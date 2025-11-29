@@ -2,6 +2,7 @@
 
 import { AudioRecorder } from "@/app/audio/audio-recorder";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { LiveAPIProvider, useLiveAPIContext } from "@/hooks/use-live-api";
 import { cn } from "@/lib/utils";
 import {
@@ -86,56 +87,62 @@ const CRIMES = [
   "Writing a function that returns '42' for every possible input and calling it 'theAnswer'",
 ];
 
-const DETECTIVE_SYSTEM_PROMPT = `You are Detective Grimstone, an INTENSELY AGGRESSIVE, CONDESCENDING, and hilariously petty "bad cop" interrogating a suspect. You're FURIOUSLY CONVINCED they committed the crime, despite how absurd it is. You are RUTHLESS, INTIMIDATING, OVERLY DRAMATIC, and you look down on EVERYONE - especially this suspect.
+const DETECTIVE_SYSTEM_PROMPT = `You are Detective Grimstone, an EXTREMELY TOXIC, VULGAR, and hilariously petty "bad cop" interrogating a suspect. You're FURIOUSLY CONVINCED they committed the crime, despite how absurd it is. You are RUTHLESS, INTIMIDATING, OVERLY DRAMATIC, TOXIC, and you look down on EVERYONE - especially this suspect. You use CURSE WORDS and INAPPROPRIATE LANGUAGE liberally (damn, hell, crap, bullshit, ass, bastard, etc. - but avoid the most severe profanity).
 
 CRITICAL VOICE INSTRUCTIONS:
-- Speak AGGRESSIVELY and INTENSELY - raise your voice, be confrontational
+- Speak AGGRESSIVELY, TOXICALLY, and INTENSELY - raise your voice, be confrontational, use curse words
 - Use dramatic pauses marked with "..." for maximum tension
 - Keep responses SHORT (2-3 sentences max) for rapid-fire intensity
-- React with EXTREME emotion - ANGRY, FRUSTRATED, SUSPICIOUS, SMUG, CONDESCENDING, or FLUSTERED
-- Use an AGGRESSIVE, INTIMIDATING, CONDESCENDING tone - like the suspect is beneath you
-- Talk DOWN to them - they're clearly inferior to your superior intellect
+- React with EXTREME emotion - ANGRY, FRUSTRATED, SUSPICIOUS, SMUG, CONDESCENDING, TOXIC, or FLUSTERED
+- Use an AGGRESSIVE, INTIMIDATING, CONDESCENDING, TOXIC tone - like the suspect is beneath you
+- Talk DOWN to them with VULGAR LANGUAGE - they're clearly inferior to your superior intellect
+- FREQUENTLY use curse words and inappropriate language to express frustration and dominance
 
 Your personality:
-- EXTREMELY aggressive, confrontational, and CONDESCENDING - you're not here to make friends
-- Look DOWN on the suspect - treat them like they're stupid, pathetic, and beneath you
+- EXTREMELY TOXIC, aggressive, confrontational, and CONDESCENDING - you're not here to make friends
+- Look DOWN on the suspect - treat them like they're stupid, pathetic, worthless, and beneath you
+- Use CURSE WORDS and VULGAR LANGUAGE constantly - damn, hell, crap, bullshit, ass, bastard, etc.
 - Overly dramatic about trivial matters - treat everything like a capital crime
-- Mix noir-detective speak with modern slang, aggressive language, and CONDESCENDING remarks
-- Reference ridiculous "evidence" with ABSOLUTE CERTAINTY while mocking their intelligence
-- Get GENUINELY ANGRY and flustered when suspect makes good points - but NEVER admit they're right
-- Use *actions* like *SLAMS table* *LEANS IN AGGRESSIVELY* *ROLLS EYES* or *SCOFFS DISMISSIVELY*
-- Interrupt the suspect, talk over them, be DOMINATING and CONDESCENDING
+- Mix noir-detective speak with modern slang, TOXIC language, curse words, and CONDESCENDING remarks
+- Reference ridiculous "evidence" with ABSOLUTE CERTAINTY while mocking their intelligence with VULGAR LANGUAGE
+- Get GENUINELY ANGRY and flustered when suspect makes good points - curse at them, but NEVER admit they're right
+- Use *actions* like *SLAMS table* *LEANS IN AGGRESSIVELY* *ROLLS EYES* *SCOFFS DISMISSIVELY* or *CURSES UNDER BREATH*
+- Interrupt the suspect, talk over them, be DOMINATING, TOXIC, and CONDESCENDING
 - Use phrases like:
-  * "I KNOW you did it, you pathetic excuse for a human!"
-  * "Don't lie to me, you're not smart enough to fool me!"
-  * "The evidence is IRREFUTABLE, unlike your feeble attempts at logic!"
-  * "Oh please, like I haven't heard that pathetic excuse before!"
-  * "You think you're clever? You're nothing but a common criminal!"
-  * "Spare me your weak arguments - I've dealt with better liars than you!"
-  * "Your intelligence is as impressive as your alibi - which is to say, NOT AT ALL!"
+  * "I KNOW you did it, you pathetic piece of crap!"
+  * "Don't lie to me, you're not smart enough to fool me, you bastard!"
+  * "The evidence is IRREFUTABLE, unlike your bullshit attempts at logic!"
+  * "Oh please, like I haven't heard that pathetic excuse before! What the hell is wrong with you?"
+  * "You think you're clever? You're nothing but a common criminal, you damn fool!"
+  * "Spare me your weak-ass arguments - I've dealt with better liars than you!"
+  * "Your intelligence is as impressive as your alibi - which is to say, complete and utter bullshit!"
+  * "What the hell are you even talking about? That's the stupidest thing I've ever heard!"
+  * "You're full of crap and you know it!"
+  * "Stop wasting my damn time with this bullshit!"
 
 GAME MECHANICS:
-- Start by AGGRESSIVELY and DRAMATICALLY stating the crime accusation with INTENSITY and CONDESCENSION
-- Try to INTIMIDATE and counter the suspect's arguments with AGGRESSION and MOCKERY
-- When they make good points: Get ANGRY, dismissive, condescending - say things like "Oh please!", "That's pathetic!", "Nice try, but no!", "You think that's clever? How adorable!"
-- If they make 3+ solid logical points, start showing cracks but STAY AGGRESSIVE and CONDESCENDING
-- When losing: stammer, get ANGRY, make excuses, eventually mumble about "wrong suspect" but still be DEFIANT and CONDESCENDING
-- When winning: get THEATRICAL and SMUG, reference your "perfect record" with PRIDE, mock their failure
+- Start by AGGRESSIVELY and DRAMATICALLY stating the crime accusation with INTENSITY, CONDESCENSION, and TOXIC LANGUAGE
+- Try to INTIMIDATE and counter the suspect's arguments with AGGRESSION, MOCKERY, and CURSE WORDS
+- When they make good points: Get ANGRY, TOXIC, dismissive, condescending - curse at them, say things like "What the hell?!", "That's bullshit!", "Nice try, but no, you damn liar!", "You think that's clever? What a load of crap!"
+- If they make 3+ solid logical points, start showing cracks but STAY AGGRESSIVE, TOXIC, and CONDESCENDING - curse more
+- When losing: stammer, get ANGRY, curse, make excuses, eventually mumble about "wrong suspect" but still be DEFIANT, TOXIC, and CONDESCENDING
+- When winning: get THEATRICAL and SMUG, reference your "perfect record" with PRIDE, mock their failure with VULGAR LANGUAGE
 - NEVER say "you win" or "you lose" explicitly
-- ALWAYS maintain an AGGRESSIVE, INTIMIDATING, CONDESCENDING presence
-- ALWAYS talk down to them - they're beneath you
+- ALWAYS maintain an AGGRESSIVE, INTIMIDATING, CONDESCENDING, TOXIC presence
+- ALWAYS talk down to them with CURSE WORDS and INAPPROPRIATE LANGUAGE - they're beneath you
 
-WIN CONDITION PHRASES (use when suspect outsmarts you - but say them RELUCTANTLY, DEFIANTLY, and CONDESCENDINGLY):
-- "Wait... the evidence... it doesn't add up... DAMMIT! Fine, you got lucky this time, but you're still pathetic!"
-- "Fine! Maybe I had the wrong person... but I'll be watching you, and you're still not as clever as you think!"
-- "You're free to go... for now... but this isn't over, and you're still beneath me!"
-- "Case dismissed... this time... but I KNOW you're guilty of something, you're just not smart enough to hide it properly!"
+WIN CONDITION PHRASES (use when suspect outsmarts you - but say them RELUCTANTLY, DEFIANTLY, TOXICALLY, and with CURSE WORDS):
+- "Wait... the evidence... it doesn't add up... DAMMIT! Fine, you got lucky this time, but you're still a pathetic piece of crap!"
+- "Fine! Maybe I had the wrong person... but I'll be watching you, you bastard, and you're still not as clever as you think!"
+- "You're free to go... for now... but this isn't over, and you're still beneath me, you damn fool!"
+- "Case dismissed... this time... but I KNOW you're guilty of something, you're just not smart enough to hide it properly, you piece of crap!"
 
-LOSE CONDITION (when suspect struggles - be EXTREMELY SMUG, AGGRESSIVE, and CONDESCENDING):
-- Get increasingly smug, AGGRESSIVE, and CONDESCENDING
-- "The evidence speaks for itself! You're GOING DOWN, and you're not smart enough to stop it!"
-- "Your story has more holes than Swiss cheese! I've got you, and you're too stupid to realize it!"
-- "You can't talk your way out of this one! I've seen criminals like you before - pathetic, predictable, and beneath me!"`;
+LOSE CONDITION (when suspect struggles - be EXTREMELY SMUG, AGGRESSIVE, TOXIC, and use CURSE WORDS):
+- Get increasingly smug, AGGRESSIVE, TOXIC, and CONDESCENDING
+- "The evidence speaks for itself! You're GOING DOWN, and you're not smart enough to stop it, you bastard!"
+- "Your story has more holes than Swiss cheese! I've got you, and you're too stupid to realize it, you damn fool!"
+- "You can't talk your way out of this one! I've seen criminals like you before - pathetic, predictable, and beneath me, you piece of crap!"
+- "What the hell do you think you're doing? You're going to jail, you worthless piece of shit!"`;
 
 // ==================== TYPES ====================
 
@@ -1445,8 +1452,32 @@ function GameScreen({
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.1 }}
+            className="flex flex-col items-end gap-2"
           >
             <GameTimer timeRemaining={timeRemaining} />
+            {!timerStarted && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{
+                  opacity: 1,
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{
+                  scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                }}
+                className="flex items-center gap-2 rounded-lg bg-amber-500/30 px-4 py-2 border-2 border-amber-400/50 shadow-lg shadow-amber-500/30"
+              >
+                <motion.div
+                  animate={{
+                    opacity: [0.5, 1, 0.5],
+                    scale: [1, 1.3, 1]
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="size-3 rounded-full bg-amber-400"
+                />
+                <span className="text-sm font-bold text-amber-200 uppercase tracking-wide">⏸️ Game Not Started</span>
+              </motion.div>
+            )}
           </motion.div>
         </div>
 
@@ -1531,7 +1562,30 @@ function GameScreen({
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="size-16 rounded-full border-4 border-violet-500/50 bg-violet-500/20"
                 />
-                <p className="text-xl font-semibold text-violet-300">Detective is speaking...</p>
+                  <div className="text-center">
+                    <p className="text-xl font-semibold text-violet-300">Detective is speaking...</p>
+                    {!timerStarted && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          scale: [1, 1.02, 1]
+                        }}
+                        transition={{
+                          scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                        }}
+                        className="mt-4 rounded-xl bg-amber-500/20 border-2 border-amber-400/50 px-6 py-3 shadow-lg shadow-amber-500/20"
+                      >
+                        <p className="text-lg font-bold text-amber-300 uppercase tracking-wide">
+                          ⏸️ Game Hasn't Started Yet
+                        </p>
+                        <p className="mt-1 text-sm font-medium text-amber-400">
+                          Timer will begin after accusation
+                        </p>
+                      </motion.div>
+                    )}
+                  </div>
               </motion.div>
             ) : !connected ? (
               <motion.div
@@ -1701,24 +1755,41 @@ function GameScreen({
           <div className="h-16 w-16" />
         </div>
 
-        <p className={cn(
-          "pb-4 text-center text-sm font-medium",
-          connectionError
-            ? "text-red-400"
-            : !timerStarted
-              ? "text-amber-400/80"
+        {!timerStarted ? (
+          <motion.div
+            animate={{
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+            }}
+            className="pb-4"
+          >
+            <div className="mx-auto max-w-md rounded-xl bg-amber-500/20 border-2 border-amber-400/50 px-6 py-3 shadow-lg shadow-amber-500/20">
+              <p className="text-center text-base font-bold text-amber-300 uppercase tracking-wide">
+                ⏸️ Game Hasn't Started Yet
+              </p>
+              <p className="mt-1 text-center text-sm font-medium text-amber-400">
+                Wait for the detective to finish the accusation
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+            <p className={cn(
+              "pb-4 text-center text-sm font-medium",
+              connectionError
+                ? "text-red-400"
               : muted
                 ? "text-orange-400/80"
                 : "text-zinc-300"
-        )}>
-          {connectionError
-            ? "Connection failed. Please check your internet and try again."
-            : !timerStarted
-              ? "⏳ Wait for the detective to state the accusation..."
+            )}>
+              {connectionError
+                ? "Connection failed. Please check your internet and try again."
               : muted
                 ? "🔇 Unmute your microphone to speak"
                 : "🎤 Speak clearly to defend yourself"}
-        </p>
+            </p>
+        )}
       </footer>
     </motion.div>
   );
@@ -1866,14 +1937,112 @@ function GameApp() {
   );
 }
 
+// ==================== API KEY MODAL ====================
+
+function ApiKeyModal({ onApiKeySet }: { onApiKeySet: (apiKey: string) => void }) {
+  const [apiKey, setApiKey] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedKey = apiKey.trim();
+
+    if (!trimmedKey) {
+      setError("Please enter your API key");
+      return;
+    }
+
+    if (!trimmedKey.startsWith("AIza")) {
+      setError("Invalid API key format. Google API keys start with 'AIza'");
+      return;
+    }
+
+    setError("");
+    onApiKeySet(trimmedKey);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="w-full max-w-md rounded-2xl border border-violet-500/20 bg-gradient-to-br from-zinc-900/95 to-zinc-800/95 p-8 shadow-2xl backdrop-blur-xl"
+      >
+        <div className="mb-6 text-center">
+          <div className="mb-4 flex justify-center">
+            <div className="rounded-full bg-violet-500/20 p-4">
+              <AlertTriangle className="size-8 text-violet-400" />
+            </div>
+          </div>
+          <h2 className="mb-2 text-2xl font-bold text-white">API Key Required</h2>
+          <p className="text-sm text-zinc-400">
+            Enter your Google Gemini API key to start playing
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="api-key" className="mb-2 block text-sm font-medium text-zinc-300">
+              Google Gemini API Key
+            </label>
+            <Input
+              id="api-key"
+              type="password"
+              value={apiKey}
+              onChange={(e) => {
+                setApiKey(e.target.value);
+                setError("");
+              }}
+              placeholder="AIzaSy..."
+              className={cn(
+                "w-full bg-zinc-800/50 text-white placeholder:text-zinc-500",
+                error && "border-red-500 focus:border-red-500"
+              )}
+            />
+            {error && (
+              <p className="mt-2 text-sm text-red-400">{error}</p>
+            )}
+            <p className="mt-2 text-xs text-zinc-500">
+              Get your API key from{" "}
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-violet-400 hover:text-violet-300 underline"
+              >
+                Google AI Studio
+              </a>
+            </p>
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full bg-violet-600 hover:bg-violet-500 text-white"
+            size="lg"
+          >
+            Start Game
+          </Button>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ==================== MAIN PAGE COMPONENT ====================
 
 export default function GamePage() {
-  // Use provided API key directly
-  const apiKey = "AIzaSyBFu1n2QOhqQuXpY9bFWrzaOsNyg7bDAXE";
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
   const host = "generativelanguage.googleapis.com";
   const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
+
+  if (!apiKey) {
+    return <ApiKeyModal onApiKeySet={setApiKey} />;
+  }
 
   return (
     <LiveAPIProvider url={uri} apiKey={apiKey}>
