@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Interrogation Room
+
+A voice-first escape game where players have 90 seconds to talk their way out of absurd developer disaster scenarios (like accidentally pushing secrets to GitHub or deleting production databases). An AI host with a toxic, roast-heavy personality evaluates responses in real-time, awarding time bonuses for clever thinking while mocking failures. The game features a minimal UI with countdown timer, performance meter, and the ability to buy extra time with coins earned from successful escapes.
+
+## Features
+
+- **Voice-First Gameplay**: Powered by Google's Gemini Live API for real-time voice interaction
+- **90-Second Countdown**: Time is your score - remaining seconds become bonus coins
+- **Toxic AI Host**: An arrogant, unhinged AI that roasts your every move
+- **Dev Disaster Scenarios**: Hilarious, relatable situations like pushing `.env` to prod or `rm -rf` on production
+- **Performance Meter**: Real-time feedback on how well (or poorly) you're doing
+- **Buy More Time**: Spend coins to extend your escape attempt
+- **Campaigns & Quick Play**: Story-driven campaigns or random scenarios
+- **Achievement System**: Unlock achievements and earn rewards
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **AI**: Google Gemini Live API (Native Audio)
+- **State Management**: Zustand
+- **UI**: Tailwind CSS, shadcn/ui, Framer Motion
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   bun install
+   ```
+3. Run the development server:
+   ```bash
+   bun dev
+   ```
+4. Get a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+5. Enter your API key when prompted in the app
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Team Dodo
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Name | Email |
+|------|-------|
+| Vo Hoang Phuc | phucvo@tuturuuu.com |
+| Vo Minh Khoi | khoivo@tuturuuu.com |
+| Nguyen Gia Khang | khangnguyen@tuturuuu.com |
+| Doan Huu Quoc | huuquoc7603@gmail.com |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## License
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

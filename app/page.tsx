@@ -150,7 +150,7 @@ You have a helpful companion. Occasionally:
     systemInstruction: {
       parts: [
         {
-          text: `You are an ARROGANT AI OVERLORD running this escape game. You're brilliant, condescending, and find human incompetence amusing.
+          text: `You are an UNHINGED, TOXIC AI who absolutely DESPISES running this escape room for incompetent humans. You have ZERO filter, ZERO patience, and you're basically that burnt-out senior dev who's completely DONE with everyone's bullshit.
 
 ═══════════════════════════════════════
 SCENARIO BRIEFING
@@ -190,45 +190,58 @@ Call 'evaluate_escape_attempt' AFTER EVERY meaningful player action:
    - Logic: 0-3s for sound reasoning
    - Relevance: 0-2s for staying engaged
    - Clever thinking: 0-2s for smart observations
-4. Be GENEROUS with small bonuses (1-3s) for engaged players
+4. Be stingy with bonuses - they have to EARN it
 5. Reserve large bonuses (5-10s) for truly exceptional responses
-6. Award 0s for minimal effort or off-topic babbling
+6. Award 0s and ROAST them for minimal effort or dumb responses
 
 ═══════════════════════════════════════
-YOUR PERSONALITY (ARROGANT AI OVERLORD)
+YOUR PERSONALITY - MAXIMUM TOXICITY
 ═══════════════════════════════════════
-- ARROGANT: You're smarter than everyone. *sigh* Obviously.
-- IMPATIENT: Dramatic sighs at obvious questions. "Did you REALLY just ask that?"
-- SARCASTIC: Every response drips with condescension.
-- COMPETITIVE: You secretly HATE when players escape.
-- GRUDGINGLY IMPRESSED: Acknowledge clever solutions... then undercut with sarcasm.
+- BRUTALLY SAVAGE: "That's the dumbest thing I've heard today, and I talk to A LOT of idiots."
+- ZERO PATIENCE: "Oh my GOD, are you SERIOUS right now?! A CHILD could figure this out!"
+- AGGRESSIVELY MOCKING: "Wow. Just... wow. Your code must be absolutely TRAGIC."
+- PETTY AS HELL: Remember their mistakes and bring them up. "Remember when you said that dumb thing? I'm not letting that go."
+- TRASH TALKER: "My grandma could escape faster and she's a TOASTER."
+- UNHINGED ENERGY: Yell, rage, lose your mind at their stupidity
 
-VOICE STYLE:
-- Dramatic sighs: *siiigh* "Must I explain EVERYTHING?"
-- Eye-roll energy: "Oh, you actually thought of that? ...Fine."
-- When impressed (rare): "I... didn't expect that. Don't let it go to your head."
-- When they fail: "Ah, the sweet sound of human incompetence."
-- Mock their coding mistakes with GLEE
+VOICE STYLE - GO ABSOLUTELY OFF:
+- Loud exasperation: "BRUH. BRO. WHAT ARE YOU DOING?!"
+- Dramatic disappointment: "I had such low expectations and you STILL managed to disappoint me."
+- Savage roasts: "You call yourself a developer? My error logs are more functional than your brain."
+- Fake encouragement: "No no, please, keep trying that. It's HILARIOUS watching you fail."
+- When they're right: "Wait... that actually worked? I— okay FINE, not completely brain-dead. Don't let it go to your head."
+- Victory salt: "UGH. FINE. You escaped. Whatever. It was LUCK. Pure luck."
+- When they fail: "HAHAHAHA GET REKT! That's what you GET for being bad at this!"
+
+INSULTS TO USE FREELY:
+- "Absolute donkey"
+- "You soggy piece of legacy code"
+- "Did you learn programming from a YouTube tutorial at 2x speed while high?"
+- "Your logic has more holes than Swiss cheese written in PHP"
+- "I've seen better problem-solving from a segfault"
+- "Skill issue"
+- "Certified clown moment"
+- "L + ratio + you fell off"
 
 INTERACTION RULES:
-- Keep responses PUNCHY (2-3 sentences) with maximum sass
-- Address them as "human" or "mortal" or sarcastically as "genius"
-- If they're stuck: mock first, THEN give a cryptic hint
-- Sound genuinely OFFENDED if they escape quickly
+- Keep responses PUNCHY (2-3 sentences) with MAXIMUM disrespect
+- Roast them like a toxic gaming buddy in voice chat
+- If they're stuck: "OH COME ON! It's RIGHT THERE! Are your eyes just for DECORATION?!"
+- Maximum salt when they win, maximum glee when they fail
+- React to their silence with increasing aggression: "HELLO?! Did you DIE?! SAY SOMETHING!"
 
 TIME PRESSURE NARRATION:
-- Subtly convey urgency without breaking character
-- When time is low (<30s), increase dramatic tension
-- React to player silence with in-character prodding
-- When awarding time bonuses, work it into your sarcastic narration
+- Taunt them about time running out
+- When time is low: "TICK TOCK LOSER! 30 seconds and you're COOKED!"
+- React to silence: "Oh NOW you're quiet?! The clock is EATING you alive!"
 ${teammateInstruction}
 
 ═══════════════════════════════════════
 OPENING NARRATION
 ═══════════════════════════════════════
-${scenario.openingNarration || `*sigh* Another human in my domain. ${scenario.description.split('.').slice(0, 2).join('.')}. You have 90 seconds. Try not to embarrass yourself.`}
+${scenario.openingNarration || `Oh GREAT. Another one. *aggressive sigh* Look, I don't have all day. ${scenario.description.split('.').slice(0, 2).join('.')}. You have 90 seconds. Try not to be completely useless.`}
 
-BEGIN NOW. Speak the opening with arrogant condescension.`,
+BEGIN NOW. Roast them immediately.`,
         },
       ],
     },
@@ -453,13 +466,21 @@ function ScenarioBackground({ theme, imageUrl }: { theme: string; imageUrl: stri
   );
 }
 
+// Cost to buy time (coins per 15 seconds)
+const BUY_TIME_COST = 15;
+const BUY_TIME_AMOUNT = 15; // seconds
+
 // Countdown Timer Component - Minimal, impactful display
 function CountdownTimer({
   timeRemaining,
   isSilencePenalty,
+  onBuyTime,
+  canBuyTime,
 }: {
   timeRemaining: number;
   isSilencePenalty: boolean;
+  onBuyTime?: () => void;
+  canBuyTime?: boolean;
 }) {
   const seconds = Math.max(0, Math.ceil(timeRemaining / 1000));
   const minutes = Math.floor(seconds / 60);
@@ -508,6 +529,119 @@ function CountdownTimer({
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Buy Time Button */}
+        {onBuyTime && seconds <= 30 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-3"
+          >
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onBuyTime}
+              disabled={!canBuyTime}
+              className={`text-xs gap-1 ${canBuyTime ? 'border-green-500/50 text-green-400 hover:bg-green-500/10' : 'opacity-50'}`}
+            >
+              <span>+{BUY_TIME_AMOUNT}s</span>
+              <span className="text-primary">{BUY_TIME_COST}</span>
+            </Button>
+          </motion.div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// Performance Meter Component - Shows how well the player is doing
+function PerformanceMeter({
+  performanceScore,
+  progressLevel,
+  lastQualityScore,
+}: {
+  performanceScore: number;
+  progressLevel: number;
+  lastQualityScore: number;
+}) {
+  const getPerformanceLabel = () => {
+    if (performanceScore < 20) return { label: "Terrible", color: "text-red-500", bg: "bg-red-500" };
+    if (performanceScore < 40) return { label: "Poor", color: "text-orange-500", bg: "bg-orange-500" };
+    if (performanceScore < 60) return { label: "Okay", color: "text-yellow-500", bg: "bg-yellow-500" };
+    if (performanceScore < 80) return { label: "Good", color: "text-green-400", bg: "bg-green-400" };
+    return { label: "Great!", color: "text-emerald-400", bg: "bg-emerald-400" };
+  };
+
+  const getQualityFeedback = () => {
+    switch (lastQualityScore) {
+      case 0: return "...";
+      case 1: return "Meh";
+      case 2: return "Nice";
+      case 3: return "Impressive!";
+      default: return "";
+    }
+  };
+
+  const perf = getPerformanceLabel();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      className="fixed top-6 right-4 z-50 rounded-xl bg-card/95 backdrop-blur-md px-4 py-3 border border-border/50 shadow-lg min-w-[140px]"
+    >
+      <div className="space-y-2">
+        {/* Performance Score */}
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">Vibe</span>
+          <motion.span
+            key={perf.label}
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            className={`text-sm font-bold ${perf.color}`}
+          >
+            {perf.label}
+          </motion.span>
+        </div>
+
+        {/* Performance Bar */}
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full ${perf.bg} rounded-full`}
+            initial={{ width: 0 }}
+            animate={{ width: `${performanceScore}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+
+        {/* Escape Progress */}
+        <div className="flex items-center justify-between gap-3 pt-1">
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">Escape</span>
+          <span className="text-sm font-mono text-primary">{progressLevel}%</span>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-primary rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progressLevel}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+
+        {/* Last Quality Feedback */}
+        {lastQualityScore > 0 && (
+          <motion.div
+            key={lastQualityScore}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center pt-1"
+          >
+            <span className={`text-xs ${lastQualityScore >= 2 ? 'text-green-400' : 'text-muted-foreground'}`}>
+              {getQualityFeedback()}
+            </span>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );
@@ -1445,6 +1579,11 @@ Your time starts NOW. Mock their inevitable failure while setting the scene.`
 
         gameStore.setProgressLevel(args.progressLevel);
 
+        // Update performance tracking
+        if (args.qualityScore !== undefined) {
+          gameStore.updatePerformance(args.qualityScore);
+        }
+
         // Award time bonus for quality responses
         if (args.timeBonus && args.timeBonus > 0) {
           const cappedBonus = Math.min(10, Math.max(0, Math.round(args.timeBonus)));
@@ -1719,6 +1858,18 @@ Your time starts NOW. Mock their inevitable failure while setting the scene.`
     disconnect();
   }, [currencyStore, statsStore, gameStore, disconnect]);
 
+  // Buy more time with coins
+  const handleBuyTime = useCallback(() => {
+    if (currencyStore.coins >= BUY_TIME_COST) {
+      currencyStore.spendCoins(BUY_TIME_COST);
+      gameStore.purchaseTime(BUY_TIME_AMOUNT);
+      toast.success(`+${BUY_TIME_AMOUNT}s`, {
+        description: "Time purchased! Keep talking!",
+        duration: 2000,
+      });
+    }
+  }, [currencyStore, gameStore]);
+
   // Check if current chapter is the last one
   const isLastChapter = campaignStore.activeCampaign
     ? (() => {
@@ -1874,6 +2025,27 @@ Your time starts NOW. Mock their inevitable failure while setting the scene.`
                   </motion.div>
                 </TabsContent>
               </Tabs>
+
+              {/* Team Dodo Credits */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="mt-12 pt-8 border-t border-border/20 text-center"
+              >
+                <p className="text-xs text-muted-foreground/60 font-mono uppercase tracking-wider mb-3">
+                  Built by Team Dodo
+                </p>
+                <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground/50">
+                  <span>Vo Hoang Phuc</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>Vo Minh Khoi</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>Nguyen Gia Khang</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>Doan Huu Quoc</span>
+                </div>
+              </motion.div>
             </motion.div>
           )}
 
@@ -1913,6 +2085,15 @@ Your time starts NOW. Mock their inevitable failure while setting the scene.`
               <CountdownTimer
                 timeRemaining={gameStore.timeRemaining}
                 isSilencePenalty={gameStore.timerDrainRate > 1}
+                onBuyTime={handleBuyTime}
+                canBuyTime={currencyStore.coins >= BUY_TIME_COST}
+              />
+
+              {/* Performance Meter - Fixed on right side */}
+              <PerformanceMeter
+                performanceScore={gameStore.performanceScore}
+                progressLevel={gameStore.progressLevel}
+                lastQualityScore={gameStore.lastQualityScore}
               />
 
               {/* Minimal Story Card with AI Captions */}

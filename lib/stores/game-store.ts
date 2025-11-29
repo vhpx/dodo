@@ -16,6 +16,12 @@ interface GameState {
   lastActivityTime: number;      // Timestamp of last user speech
   silenceThreshold: number;      // Time before silence penalty (5000ms)
   bonusTimeAwarded: number;      // Total bonus time earned
+  timePurchased: number;         // Total time purchased with coins
+
+  // Performance tracking
+  performanceScore: number;      // 0-100 score based on recent responses
+  lastQualityScore: number;      // Most recent quality score from AI (0-3)
+  qualityHistory: number[];      // Recent quality scores for averaging
 
   // Active effects
   hasDoubleReward: boolean;
@@ -38,9 +44,14 @@ interface GameState {
   // Timer actions
   initializeTimer: () => void;
   addBonusTime: (seconds: number) => void;
+  purchaseTime: (seconds: number) => void;
   setDrainRate: (rate: number) => void;
   updateActivity: () => void;
   decrementTime: (deltaMs: number) => void;
+
+  // Performance actions
+  updatePerformance: (qualityScore: number) => void;
+  getPerformanceLevel: () => 'terrible' | 'poor' | 'okay' | 'good' | 'great';
 }
 
 const INITIAL_TIME = 90000; // 90 seconds in milliseconds
@@ -60,6 +71,12 @@ export const useGameStore = create<GameState>((set, get) => ({
   lastActivityTime: Date.now(),
   silenceThreshold: SILENCE_THRESHOLD,
   bonusTimeAwarded: 0,
+  timePurchased: 0,
+
+  // Performance initial state
+  performanceScore: 50,
+  lastQualityScore: 1,
+  qualityHistory: [],
 
   hasDoubleReward: false,
   hasAiTeammate: false,
@@ -77,6 +94,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       timerDrainRate: 1.0,
       lastActivityTime: Date.now(),
       bonusTimeAwarded: 0,
+      timePurchased: 0,
+      // Initialize performance
+      performanceScore: 50,
+      lastQualityScore: 1,
+      qualityHistory: [],
     }),
 
   setScenarioImage: (imageUrl) =>
@@ -120,6 +142,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       timerDrainRate: 1.0,
       lastActivityTime: Date.now(),
       bonusTimeAwarded: 0,
+      timePurchased: 0,
+      // Reset performance
+      performanceScore: 50,
+      lastQualityScore: 1,
+      qualityHistory: [],
     }),
 
   setPhase: (phase) => set({ phase }),
@@ -161,4 +188,33 @@ export const useGameStore = create<GameState>((set, get) => ({
         timeRemaining: Math.max(0, state.timeRemaining - drain),
       };
     }),
+
+  purchaseTime: (seconds: number) =>
+    set((state) => ({
+      timeRemaining: state.timeRemaining + seconds * 1000,
+      timePurchased: state.timePurchased + seconds,
+    })),
+
+  // Performance tracking
+  updatePerformance: (qualityScore: number) =>
+    set((state) => {
+      const newHistory = [...state.qualityHistory.slice(-4), qualityScore]; // Keep last 5 scores
+      const avgQuality = newHistory.reduce((a, b) => a + b, 0) / newHistory.length;
+      // Convert 0-3 quality scale to 0-100 performance with more weight on recent
+      const newPerformance = Math.round((avgQuality / 3) * 100);
+      return {
+        lastQualityScore: qualityScore,
+        qualityHistory: newHistory,
+        performanceScore: newPerformance,
+      };
+    }),
+
+  getPerformanceLevel: () => {
+    const state = get();
+    if (state.performanceScore < 20) return 'terrible';
+    if (state.performanceScore < 40) return 'poor';
+    if (state.performanceScore < 60) return 'okay';
+    if (state.performanceScore < 80) return 'good';
+    return 'great';
+  },
 }));
