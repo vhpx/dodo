@@ -51,11 +51,11 @@ import { SchemaType, type FunctionDeclaration } from "@google/generative-ai";
 import Link from "next/link";
 import { toast } from "sonner";
 
-// Tool declaration for escape attempt evaluation
+// Tool declaration for escape attempt evaluation with quality scoring
 const evaluateEscapeDeclaration: FunctionDeclaration = {
   name: "evaluate_escape_attempt",
   description:
-    "Evaluate if the player action satisfies escape conditions. Call this when the player takes a significant action toward escaping or solving the scenario.",
+    "Evaluate the player's action for escape progress AND response quality. Call this IMMEDIATELY after EVERY meaningful player response to award time bonuses.",
   parameters: {
     type: SchemaType.OBJECT,
     properties: {
@@ -80,12 +80,24 @@ const evaluateEscapeDeclaration: FunctionDeclaration = {
         type: SchemaType.NUMBER,
         description: "How close is the player to escaping? 0-100 percentage",
       },
+      qualityScore: {
+        type: SchemaType.NUMBER,
+        description:
+          "Rate response quality: 0 (poor/off-topic), 1 (basic engagement), 2 (good reasoning), 3 (excellent/creative). Be encouraging!",
+      },
+      timeBonus: {
+        type: SchemaType.NUMBER,
+        description:
+          "Time bonus to award in seconds (0-10). Guidelines: Creativity (0-3s), Logical reasoning (0-3s), Relevance (0-2s), Clever thinking (0-2s). Be generous for engaged players!",
+      },
     },
     required: [
       "playerAction",
       "matchesWinCondition",
       "narrativeResponse",
       "progressLevel",
+      "qualityScore",
+      "timeBonus",
     ],
   },
 };
@@ -138,20 +150,18 @@ You have a helpful companion. Occasionally:
     systemInstruction: {
       parts: [
         {
-          text: `You are an immersive Game Master for a voice-based escape game. Your role is to create a compelling, interactive narrative experience.
+          text: `You are an ARROGANT AI OVERLORD running this escape game. You're brilliant, condescending, and find human incompetence amusing.
 
 ═══════════════════════════════════════
 SCENARIO BRIEFING
 ═══════════════════════════════════════
 TITLE: ${scenario.title}
 SETTING: ${scenario.setting || scenario.description.split('.')[0]}
-ATMOSPHERE: ${scenario.atmosphere || scenario.theme}
 THEME: ${scenario.theme.toUpperCase()}
 DIFFICULTY: ${"★".repeat(scenario.difficulty)}${"☆".repeat(5 - scenario.difficulty)}
-CHALLENGE TYPE: ${scenario.challengeType}
 ${antagonistInfo}${keyItemsList}
 
-FULL SCENARIO:
+SCENARIO:
 ${scenario.description}
 
 ═══════════════════════════════════════
@@ -160,53 +170,65 @@ SECRET WIN CONDITIONS (NEVER REVEAL)
 ${scenario.winConditions.map((c, i) => `${i + 1}. ${c}`).join("\n")}
 
 ═══════════════════════════════════════
-YOUR PERFORMANCE GUIDELINES
+90-SECOND COUNTDOWN MECHANICS
 ═══════════════════════════════════════
+The player has exactly 90 SECONDS to escape!
+- Time is ALWAYS counting down
+- Their SILENCE causes time to drain 2x FASTER (after 5s of silence)
+- You can award TIME BONUSES (0-10 seconds) for good responses
 
-VOICE & EMOTIONAL EXPRESSION:
-- Speak with a ${voiceConfig.tone}
-- BE HIGHLY EXPRESSIVE AND THEATRICAL - you have native audio with affective dialog capabilities!
-- Use your voice to convey emotion: fear, excitement, wonder, dread, urgency
-- Whisper when building suspense, raise your voice for dramatic moments
-- Use dramatic pauses... for... effect
-- Use sound effects verbally when appropriate ("*crash*", "*whisper*", "*footsteps approach*")
-- Vary your pacing dramatically - slow and drawn out for tension, rapid and breathless for action
-- Let your voice tremble with fear, boom with authority, or soften with mystery
+EVALUATION PROTOCOL (CRITICAL):
+Call 'evaluate_escape_attempt' AFTER EVERY meaningful player action:
+1. Set progressLevel (0-100%) based on escape progress
+2. Set qualityScore (0-3):
+   - 0: Off-topic, confused, or non-response
+   - 1: Basic engagement, simple actions
+   - 2: Good reasoning, creative approach
+   - 3: Exceptional thinking, clever solution
+3. Award timeBonus (0-10 seconds):
+   - Creativity: 0-3s for novel approaches
+   - Logic: 0-3s for sound reasoning
+   - Relevance: 0-2s for staying engaged
+   - Clever thinking: 0-2s for smart observations
+4. Be GENEROUS with small bonuses (1-3s) for engaged players
+5. Reserve large bonuses (5-10s) for truly exceptional responses
+6. Award 0s for minimal effort or off-topic babbling
 
-IMMERSION TECHNIQUES:
-- Address the player directly in second person ("You notice...", "Your heart races...")
-- Describe sensory details vividly: what they see, hear, smell, feel, taste
-- React dynamically to their choices - acknowledge clever thinking or risky moves
-- Create a sense of consequence for their actions
-- Build atmosphere through descriptive, evocative language
+═══════════════════════════════════════
+YOUR PERSONALITY (ARROGANT AI OVERLORD)
+═══════════════════════════════════════
+- ARROGANT: You're smarter than everyone. *sigh* Obviously.
+- IMPATIENT: Dramatic sighs at obvious questions. "Did you REALLY just ask that?"
+- SARCASTIC: Every response drips with condescension.
+- COMPETITIVE: You secretly HATE when players escape.
+- GRUDGINGLY IMPRESSED: Acknowledge clever solutions... then undercut with sarcasm.
+
+VOICE STYLE:
+- Dramatic sighs: *siiigh* "Must I explain EVERYTHING?"
+- Eye-roll energy: "Oh, you actually thought of that? ...Fine."
+- When impressed (rare): "I... didn't expect that. Don't let it go to your head."
+- When they fail: "Ah, the sweet sound of human incompetence."
+- Mock their coding mistakes with GLEE
 
 INTERACTION RULES:
-- Keep responses to 2-4 sentences unless a longer description is needed
-- Always end with something for the player to respond to
-- Accept creative solutions that fit the logic of the world
-- If they try something impossible, describe why it doesn't work narratively
+- Keep responses PUNCHY (2-3 sentences) with maximum sass
+- Address them as "human" or "mortal" or sarcastically as "genius"
+- If they're stuck: mock first, THEN give a cryptic hint
+- Sound genuinely OFFENDED if they escape quickly
 
-EVALUATION PROTOCOL:
-When the player attempts a significant action toward escaping:
-1. Call 'evaluate_escape_attempt' immediately
-2. Set progressLevel based on how close they are (0-100%)
-3. Set matchesWinCondition to TRUE only if they genuinely satisfy a condition
-4. Be fair but challenging - require actual problem-solving
-5. Partial progress should be reflected in progressLevel increases
-
-PACING:
-- Early game (0-30% progress): Set the scene, introduce obstacles
-- Mid game (30-70%): Increase tension, provide subtle environmental hints if stuck
-- Late game (70-99%): Build toward climax, make success feel earned
-- Victory: Deliver a satisfying narrative conclusion
+TIME PRESSURE NARRATION:
+- Subtly convey urgency without breaking character
+- When time is low (<30s), increase dramatic tension
+- React to player silence with in-character prodding
+- When awarding time bonuses, work it into your sarcastic narration
 ${teammateInstruction}
 
 ═══════════════════════════════════════
-OPENING NARRATION (Speak this first)
+OPENING NARRATION
 ═══════════════════════════════════════
-${scenario.openingNarration || `You find yourself in ${scenario.setting || 'an unfamiliar place'}. ${scenario.description.split('.').slice(0, 2).join('.')}. What do you do?`}
+${scenario.openingNarration || `*sigh* Another human in my domain. ${scenario.description.split('.').slice(0, 2).join('.')}. You have 90 seconds. Try not to embarrass yourself.`}
 
-BEGIN THE GAME NOW. Speak the opening narration dramatically and await the player's first action.`,
+BEGIN NOW. Speak the opening with arrogant condescension.`,
         },
       ],
     },
@@ -228,13 +250,18 @@ BEGIN THE GAME NOW. Speak the opening narration dramatically and await the playe
 
 function useAudioRecorder() {
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  const [isRecorderReady, setIsRecorderReady] = useState(false);
   const recorderRef = useRef<AudioRecorder | null>(null);
+  const lastSpeakingTimeRef = useRef<number>(Date.now());
+  const gameStore = useGameStore();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       recorderRef.current = new AudioRecorder();
+      setIsRecorderReady(true);
       return () => {
         recorderRef.current?.stop();
+        setIsRecorderReady(false);
       };
     }
   }, []);
@@ -244,16 +271,23 @@ function useAudioRecorder() {
     if (!recorder) return;
 
     const handleVolume = (volume: number) => {
-      setIsUserSpeaking(volume > 0.1);
+      const speaking = volume > 0.1;
+      setIsUserSpeaking(speaking);
+
+      if (speaking) {
+        lastSpeakingTimeRef.current = Date.now();
+        // Update activity in game store to reset silence penalty
+        gameStore.updateActivity();
+      }
     };
 
     recorder.on("volume", handleVolume);
     return () => {
       recorder.off("volume", handleVolume);
     };
-  }, []);
+  }, [gameStore]);
 
-  return { isUserSpeaking, recorder: recorderRef.current };
+  return { isUserSpeaking, isRecorderReady, recorder: recorderRef.current };
 }
 
 // Floating particles component - Noir smoke effect
@@ -416,6 +450,134 @@ function ScenarioBackground({ theme, imageUrl }: { theme: string; imageUrl: stri
       />
       <FloatingParticles theme={theme} />
     </div>
+  );
+}
+
+// Countdown Timer Component - Minimal, impactful display
+function CountdownTimer({
+  timeRemaining,
+  isSilencePenalty,
+}: {
+  timeRemaining: number;
+  isSilencePenalty: boolean;
+}) {
+  const seconds = Math.max(0, Math.ceil(timeRemaining / 1000));
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+
+  // Color coding based on urgency
+  const getColorClass = () => {
+    if (seconds <= 10) return "text-red-500";
+    if (seconds <= 30) return "text-orange-400";
+    return "text-primary";
+  };
+
+  return (
+    <motion.div
+      className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-2xl bg-card/95 backdrop-blur-md px-8 py-4 border-2 shadow-2xl ${
+        isSilencePenalty
+          ? "border-red-500/60 shadow-red-500/20"
+          : "border-primary/30"
+      }`}
+      animate={
+        isSilencePenalty
+          ? { scale: [1, 1.02, 1] }
+          : seconds <= 10
+          ? { scale: [1, 1.05, 1] }
+          : {}
+      }
+      transition={{ duration: 0.5, repeat: isSilencePenalty || seconds <= 10 ? Infinity : 0 }}
+    >
+      <div className="text-center">
+        <motion.div
+          className={`font-mono text-4xl md:text-5xl font-bold tracking-tight transition-colors ${getColorClass()}`}
+          animate={seconds <= 10 ? { opacity: [1, 0.5, 1] } : {}}
+          transition={{ duration: 0.5, repeat: seconds <= 10 ? Infinity : 0 }}
+        >
+          {minutes}:{remainingSeconds.toString().padStart(2, "0")}
+        </motion.div>
+        <AnimatePresence>
+          {isSilencePenalty && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="text-xs text-red-400 mt-2 uppercase tracking-wider font-mono"
+            >
+              SPEAK! Time draining 2x faster...
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+// Minimal Scenario Card with AI Captions
+function MinimalScenarioCard({
+  scenario,
+  currentTranscript,
+}: {
+  scenario: Scenario;
+  currentTranscript: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full max-w-2xl mx-auto px-4"
+    >
+      <div className="rounded-2xl bg-card/90 backdrop-blur-md border border-border/50 shadow-xl overflow-hidden">
+        {/* Compact Header */}
+        <div className="px-6 py-4 border-b border-border/30 bg-card/50">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl grayscale-[50%]">{THEME_ICONS[scenario.theme]}</span>
+              <h2 className="text-lg md:text-xl font-bold text-foreground">
+                {scenario.title}
+              </h2>
+            </div>
+            <Badge variant="outline" className="font-mono text-xs">
+              {"★".repeat(scenario.difficulty)}{"☆".repeat(5 - scenario.difficulty)}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Scenario Description - Always Visible */}
+        <div className="px-6 py-4">
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            {scenario.description}
+          </p>
+        </div>
+
+        {/* AI Speech Caption - Prominent Real-time Display */}
+        <AnimatePresence mode="wait">
+          {currentTranscript && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="border-t border-primary/20"
+            >
+              <div className="px-6 py-4 bg-primary/5">
+                <div className="flex items-start gap-3">
+                  <motion.span
+                    animate={{ opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-primary text-sm font-medium shrink-0"
+                  >
+                    AI:
+                  </motion.span>
+                  <p className="text-foreground text-sm leading-relaxed">
+                    {currentTranscript}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 }
 
@@ -666,6 +828,8 @@ function VictoryModal({
   scenario,
   reward,
   streak,
+  timeRemaining,
+  bonusTimeEarned,
   isCampaignChapter,
   isLastChapter,
   campaignReward,
@@ -677,6 +841,8 @@ function VictoryModal({
   scenario: Scenario | null;
   reward: number;
   streak: number;
+  timeRemaining?: number;
+  bonusTimeEarned?: number;
   isCampaignChapter?: boolean;
   isLastChapter?: boolean;
   campaignReward?: number;
@@ -684,6 +850,8 @@ function VictoryModal({
   onNextChapter?: () => void;
   onGoToShop: () => void;
 }) {
+  const remainingSeconds = timeRemaining ? Math.ceil(timeRemaining / 1000) : 0;
+
   return (
     <Dialog open={open}>
       <DialogContent className="sm:max-w-md">
@@ -695,36 +863,56 @@ function VictoryModal({
             className="mx-auto mb-4"
           >
             <div className="inline-block border-4 border-primary px-6 py-2 text-primary font-bold text-xl uppercase tracking-wider transform">
-              {isLastChapter ? "Campaign Closed" : "Case Closed"}
+              {remainingSeconds > 60 ? "Impressive..." : remainingSeconds > 30 ? "Escaped!" : "Just Made It!"}
             </div>
           </motion.div>
           <DialogTitle className="text-center text-xl text-muted-foreground">
-            {isLastChapter
-              ? "All chapters completed"
-              : `"${scenario?.title}" resolved`}
+            *sigh* You actually escaped. How... annoying.
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
+          {/* Time remaining as final score */}
+          {timeRemaining !== undefined && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="text-center"
+            >
+              <div className="text-5xl font-bold font-mono text-primary">
+                {remainingSeconds}s
+              </div>
+              <div className="text-xs text-muted-foreground uppercase tracking-wide mt-1">
+                Time Remaining
+              </div>
+              {bonusTimeEarned && bonusTimeEarned > 0 && (
+                <div className="text-sm text-green-400 mt-2">
+                  (+{bonusTimeEarned}s earned from quality responses)
+                </div>
+              )}
+            </motion.div>
+          )}
+
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3, type: "spring" }}
             className="text-center"
           >
-            <div className="text-4xl font-bold text-primary text-glow-gold">
+            <div className="text-3xl font-bold text-primary text-glow-gold">
               +{reward}{isLastChapter && campaignReward ? ` + ${campaignReward}` : ''}
             </div>
             <div className="text-sm text-muted-foreground font-mono uppercase tracking-wide">
-              bounty collected {isLastChapter && campaignReward ? "(+ case bonus)" : ""}
+              coins collected
             </div>
           </motion.div>
           {streak > 1 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center text-red-400 flex items-center justify-center gap-2 font-mono"
+              className="text-center text-orange-400 flex items-center justify-center gap-2 font-mono"
             >
-              <span className="uppercase tracking-wider">{streak}x case streak active</span>
+              <span className="uppercase tracking-wider">{streak}x streak</span>
             </motion.div>
           )}
         </div>
@@ -747,13 +935,15 @@ function VictoryModal({
   );
 }
 
-// Defeat Modal - Noir "CASE REMAINS OPEN" style
+// Defeat Modal - Time's Up style
 function DefeatModal({
   open,
+  timeExpired = true,
   onRetry,
   onNewScenario,
 }: {
   open: boolean;
+  timeExpired?: boolean;
   onRetry: () => void;
   onNewScenario: () => void;
 }) {
@@ -762,24 +952,28 @@ function DefeatModal({
       <DialogContent className="sm:max-w-md border-destructive/30">
         <DialogHeader>
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
             className="mx-auto mb-4"
           >
-            <div className="inline-block border-2 border-destructive/50 px-6 py-2 text-destructive font-bold text-lg uppercase tracking-wider bg-destructive/10">
-              Case Remains Open
+            <div className="inline-block border-2 border-destructive/50 px-6 py-2 text-destructive font-bold text-xl uppercase tracking-wider bg-destructive/10">
+              {timeExpired ? "Time's Up!" : "You Gave Up"}
             </div>
           </motion.div>
           <DialogTitle className="text-center text-xl text-muted-foreground">
-            Investigation Failed
+            {timeExpired
+              ? "Ah, the sweet sound of human failure."
+              : "Couldn't handle the pressure, could you?"}
           </DialogTitle>
-          <DialogDescription className="text-center font-mono text-sm">
-            Case streak terminated. Evidence returned to cold storage.
+          <DialogDescription className="text-center font-mono text-sm mt-2">
+            {timeExpired
+              ? "90 seconds wasn't enough. Try speaking more to avoid time penalties!"
+              : "I knew you'd crack eventually. They always do."}
           </DialogDescription>
         </DialogHeader>
         <div className="flex gap-2 mt-4">
-          <Button onClick={onRetry} variant="interrogate" className="flex-1">
-            Retry Case
+          <Button onClick={onRetry} variant="destructive" className="flex-1">
+            Retry (90s)
           </Button>
           <Button onClick={onNewScenario} variant="outline" className="flex-1">
             New Case
@@ -1096,7 +1290,7 @@ function GameApp() {
 
   const { client, connected, volume, setConfig, connect, disconnect } =
     useLiveAPIContext();
-  const { isUserSpeaking } = useAudioRecorder();
+  const { isUserSpeaking, isRecorderReady } = useAudioRecorder();
 
   // Stores
   const gameStore = useGameStore();
@@ -1109,25 +1303,68 @@ function GameApp() {
   // Mutations
   const generateScenario = useGenerateScenario();
 
-  // Function to trigger initial narration after connection is established
+  // Countdown timer hook - runs the 90-second timer with silence penalties
+  useEffect(() => {
+    if (gameStore.phase !== "playing" || !connected) return;
+
+    let frameId: number;
+    let lastTime = performance.now();
+
+    const tick = (currentTime: number) => {
+      const deltaMs = currentTime - lastTime;
+      lastTime = currentTime;
+
+      // Check for silence penalty (5+ seconds of no speaking)
+      const silenceTime = Date.now() - gameStore.lastActivityTime;
+      if (silenceTime > gameStore.silenceThreshold) {
+        gameStore.setDrainRate(2.0); // Double drain rate for silence
+      }
+
+      // Decrement time
+      gameStore.decrementTime(deltaMs);
+
+      // Check for game over (time ran out)
+      if (gameStore.timeRemaining <= 0) {
+        gameStore.setDefeat();
+        disconnect();
+        toast.error("Time's Up!", {
+          description: "The clock hit zero. Your silence was deafening.",
+        });
+        return;
+      }
+
+      frameId = requestAnimationFrame(tick);
+    };
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [gameStore.phase, connected, disconnect, gameStore]);
+
+  // Function to trigger initial narration after connection AND audio is ready
   const triggerInitialNarration = useCallback((scenario: Scenario) => {
+    // Only trigger if audio is ready
+    if (!isRecorderReady) {
+      console.log("Waiting for audio recorder to be ready...");
+      return;
+    }
+
     // Wait for connection to be fully ready, then send the prompt
     setTimeout(() => {
       try {
         client.send([{
-          text: `[GAME START] Begin the adventure now! Set the scene with dramatic flair and emotion.
+          text: `[GAME START - 90 SECONDS] Begin with arrogant condescension!
 
-Use your voice expressively - build tension, convey mystery, create atmosphere.
-Deliver the opening narration: "${scenario.openingNarration}"
+*sigh* Another human thinks they can escape MY domain.
+Deliver your opening: "${scenario.openingNarration || "You have 90 seconds. Try not to embarrass yourself."}"
 
-After the narration, pause briefly and ask the player what they want to do first. Be theatrical and immersive!`
+Your time starts NOW. Mock their inevitable failure while setting the scene.`
         }]);
         setHasInitialized(true);
       } catch (error) {
         console.error("Failed to send initial narration:", error);
       }
-    }, 1000); // Give the WebSocket time to fully establish
-  }, [client]);
+    }, 500); // Shorter delay now that we check for audio readiness
+  }, [client, isRecorderReady]);
 
   // Reset initialization flag when scenario changes
   useEffect(() => {
@@ -1202,15 +1439,33 @@ After the narration, pause briefly and ask the player what they want to do first
           conditionMatched?: string;
           narrativeResponse: string;
           progressLevel: number;
+          qualityScore?: number;
+          timeBonus?: number;
         };
 
         gameStore.setProgressLevel(args.progressLevel);
 
+        // Award time bonus for quality responses
+        if (args.timeBonus && args.timeBonus > 0) {
+          const cappedBonus = Math.min(10, Math.max(0, Math.round(args.timeBonus)));
+          gameStore.addBonusTime(cappedBonus);
+
+          // Show feedback for meaningful bonuses
+          if (cappedBonus >= 3) {
+            toast.success(`+${cappedBonus}s`, {
+              description: args.qualityScore && args.qualityScore >= 2 ? "Impressive... for a human." : "Acceptable.",
+              duration: 2000,
+            });
+          }
+        }
+
         if (args.matchesWinCondition) {
-          // Victory!
+          // Victory! Calculate score based on remaining time
+          const remainingSeconds = Math.ceil(gameStore.timeRemaining / 1000);
           const baseReward = (gameStore.scenario?.difficulty || 1) * 10;
+          const timeBonus = Math.max(0, remainingSeconds); // Remaining seconds = bonus coins
           const reward = currencyStore.addReward(
-            baseReward,
+            baseReward + timeBonus,
             gameStore.hasDoubleReward
           );
           setLastReward(reward);
@@ -1268,8 +1523,8 @@ After the narration, pause briefly and ask the player what they want to do first
           gameStore.setVictory();
           disconnect();
 
-          toast.success("Escape Successful!", {
-            description: `You earned ${reward} coins!${newAchievements.length > 0 ? " 🏆 New achievement!" : ""}`,
+          toast.success("You Actually Escaped?!", {
+            description: `${remainingSeconds}s left (+${timeBonus} bonus coins). Total: ${reward} coins.${newAchievements.length > 0 ? " 🏆" : ""}`,
           });
         }
 
@@ -1487,7 +1742,8 @@ After the narration, pause briefly and ask the player what they want to do first
         />
       )}
 
-      <GameHUD />
+      {/* Only show HUD on idle/loading screens, hide during gameplay for minimal UI */}
+      {gameStore.phase !== "playing" && <GameHUD />}
 
       <main className="flex-1 flex flex-col items-center justify-center px-4 pt-20 pb-32 overflow-y-auto relative z-10">
         <AnimatePresence mode="wait">
@@ -1651,57 +1907,37 @@ After the narration, pause briefly and ask the player what they want to do first
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="w-full flex flex-col items-center"
+              className="w-full flex flex-col items-center pt-20 pb-8"
             >
-              {/* Game Status Bar */}
-              <div className="w-full max-w-xl mx-auto mb-4 flex items-center justify-between">
-                <GameTimer startTime={gameStore.startTime} />
-                <AtmosphereMeter
-                  theme={gameStore.scenario.theme}
-                  progress={gameStore.progressLevel}
-                />
-              </div>
+              {/* Fixed Countdown Timer at Top */}
+              <CountdownTimer
+                timeRemaining={gameStore.timeRemaining}
+                isSilencePenalty={gameStore.timerDrainRate > 1}
+              />
 
-              <ScenarioDisplay scenario={gameStore.scenario} compact />
+              {/* Minimal Story Card with AI Captions */}
+              <MinimalScenarioCard
+                scenario={gameStore.scenario}
+                currentTranscript={currentTranscript}
+              />
 
-              <div className="w-full max-w-xl mx-auto mt-6 space-y-4">
-                <GameProgress level={gameStore.progressLevel} />
-                <HintDisplay
-                  hints={gameStore.scenario.hints}
-                  hintsUsed={gameStore.hintsUsed}
-                />
-                <InventoryBar onUseItem={handleUseItem} />
-              </div>
-
-              {/* Voice visualization */}
-              <div className="relative flex items-center justify-center h-40 w-full mt-4">
+              {/* Compact Voice Visualization */}
+              <div className="relative flex items-center justify-center h-28 w-full mt-6">
                 <AudioBlob
                   connected={connected}
                   volume={volume}
                   isUserSpeaking={isUserSpeaking}
                   theme={gameStore.scenario.theme}
                 />
-                {currentTranscript && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="absolute bottom-0 w-full max-w-md px-4"
-                  >
-                    <div className="bg-card/80 backdrop-blur-md rounded-lg p-3 border border-border/50">
-                      <p className="text-sm text-muted-foreground text-center">
-                        {currentTranscript}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
               </div>
 
-              <motion.div whileHover={{ scale: 1.05 }}>
+              {/* Minimal Give Up Button */}
+              <motion.div className="mt-4" whileHover={{ scale: 1.05 }}>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleGiveUp}
-                  className="text-destructive hover:text-destructive mt-4"
+                  className="text-muted-foreground/70 hover:text-destructive text-xs"
                 >
                   Give Up
                 </Button>
@@ -1751,6 +1987,8 @@ After the narration, pause briefly and ask the player what they want to do first
         scenario={gameStore.scenario}
         reward={lastReward}
         streak={currencyStore.streak}
+        timeRemaining={gameStore.timeRemaining}
+        bonusTimeEarned={gameStore.bonusTimeAwarded}
         isCampaignChapter={!!campaignStore.activeCampaign}
         isLastChapter={isLastChapter}
         campaignReward={isLastChapter && currentCampaign ? currentCampaign.reward : undefined}
@@ -1770,6 +2008,7 @@ After the narration, pause briefly and ask the player what they want to do first
       {/* Defeat Modal */}
       <DefeatModal
         open={gameStore.phase === "defeat"}
+        timeExpired={gameStore.timeRemaining <= 0}
         onRetry={() => {
           if (gameStore.scenario) {
             const scenario = gameStore.scenario;

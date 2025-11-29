@@ -88,6 +88,18 @@ export interface EscapeAttemptEvaluation {
   conditionMatched?: string;
   narrativeResponse: string;
   progressLevel: number;
+  // Quality evaluation for scoring
+  qualityScore: number;  // 0-3 scale: 0=poor, 1=basic, 2=good, 3=excellent
+  timeBonus: number;     // 0-10 seconds bonus for quality responses
+}
+
+// Game score summary
+export interface GameScore {
+  timeRemaining: number;      // Final seconds left
+  bonusTimeEarned: number;    // Total bonus earned during game
+  baseReward: number;         // Difficulty-based reward
+  timeBonus: number;          // Coins from remaining time
+  totalReward: number;        // Final coin reward
 }
 
 // Campaign types

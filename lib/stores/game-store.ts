@@ -10,6 +10,13 @@ interface GameState {
   conversationHistory: Message[];
   progressLevel: number;
 
+  // Timer state (90-second countdown)
+  timeRemaining: number;         // Countdown in milliseconds
+  timerDrainRate: number;        // 1.0 = normal, 2.0 = silence penalty
+  lastActivityTime: number;      // Timestamp of last user speech
+  silenceThreshold: number;      // Time before silence penalty (5000ms)
+  bonusTimeAwarded: number;      // Total bonus time earned
+
   // Active effects
   hasDoubleReward: boolean;
   hasAiTeammate: boolean;
@@ -27,7 +34,17 @@ interface GameState {
   activateDoubleReward: () => void;
   activateAiTeammate: () => void;
   deactivateEffects: () => void;
+
+  // Timer actions
+  initializeTimer: () => void;
+  addBonusTime: (seconds: number) => void;
+  setDrainRate: (rate: number) => void;
+  updateActivity: () => void;
+  decrementTime: (deltaMs: number) => void;
 }
+
+const INITIAL_TIME = 90000; // 90 seconds in milliseconds
+const SILENCE_THRESHOLD = 5000; // 5 seconds before penalty
 
 export const useGameStore = create<GameState>((set, get) => ({
   phase: 'idle',
@@ -36,6 +53,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   startTime: null,
   conversationHistory: [],
   progressLevel: 0,
+
+  // Timer initial state
+  timeRemaining: INITIAL_TIME,
+  timerDrainRate: 1.0,
+  lastActivityTime: Date.now(),
+  silenceThreshold: SILENCE_THRESHOLD,
+  bonusTimeAwarded: 0,
+
   hasDoubleReward: false,
   hasAiTeammate: false,
 
@@ -47,6 +72,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       startTime: Date.now(),
       conversationHistory: [],
       progressLevel: 0,
+      // Initialize timer for new game
+      timeRemaining: INITIAL_TIME,
+      timerDrainRate: 1.0,
+      lastActivityTime: Date.now(),
+      bonusTimeAwarded: 0,
     }),
 
   setScenarioImage: (imageUrl) =>
@@ -85,6 +115,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       progressLevel: 0,
       hasDoubleReward: false,
       hasAiTeammate: false,
+      // Reset timer
+      timeRemaining: INITIAL_TIME,
+      timerDrainRate: 1.0,
+      lastActivityTime: Date.now(),
+      bonusTimeAwarded: 0,
     }),
 
   setPhase: (phase) => set({ phase }),
@@ -94,4 +129,36 @@ export const useGameStore = create<GameState>((set, get) => ({
   activateAiTeammate: () => set({ hasAiTeammate: true }),
 
   deactivateEffects: () => set({ hasDoubleReward: false, hasAiTeammate: false }),
+
+  // Timer actions
+  initializeTimer: () =>
+    set({
+      timeRemaining: INITIAL_TIME,
+      timerDrainRate: 1.0,
+      lastActivityTime: Date.now(),
+      bonusTimeAwarded: 0,
+    }),
+
+  addBonusTime: (seconds: number) =>
+    set((state) => ({
+      timeRemaining: state.timeRemaining + seconds * 1000,
+      bonusTimeAwarded: state.bonusTimeAwarded + seconds,
+    })),
+
+  setDrainRate: (rate: number) =>
+    set({ timerDrainRate: Math.max(1.0, Math.min(3.0, rate)) }),
+
+  updateActivity: () =>
+    set({
+      lastActivityTime: Date.now(),
+      timerDrainRate: 1.0, // Reset drain rate when user speaks
+    }),
+
+  decrementTime: (deltaMs: number) =>
+    set((state) => {
+      const drain = deltaMs * state.timerDrainRate;
+      return {
+        timeRemaining: Math.max(0, state.timeRemaining - drain),
+      };
+    }),
 }));
