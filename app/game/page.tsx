@@ -22,7 +22,6 @@ import {
   Play,
   RotateCcw,
   Skull,
-  Target,
   Trophy,
   Volume2,
   Zap,
@@ -1105,9 +1104,6 @@ function GameScreen({
   const hasSentAccusationRef = useRef(false);
   const firstTurnCompleteRef = useRef(false);
 
-  // Calculate difficulty based on time remaining (harder = more time left)
-  const difficulty = timeRemaining > 90 ? "Easy" : timeRemaining > 50 ? "Medium" : "Hard";
-
   // Calculate score (base score + time bonus)
   const baseScore = 1000;
   const timeBonus = Math.floor(timeRemaining * 10);
@@ -1588,28 +1584,6 @@ function GameScreen({
             </motion.div>
             <p className="mt-2 text-xs text-cyan-400/70">
               Base: {baseScore} + Time Bonus: {timeBonus}
-            </p>
-          </div>
-
-          {/* Difficulty Card */}
-          <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-br from-pink-950/40 to-rose-950/40 p-6 shadow-xl backdrop-blur-lg">
-            <div className="mb-4 flex items-center gap-2">
-              <Target className="size-5 text-pink-400" />
-              <h3 className="text-lg font-bold text-pink-300">Difficulty</h3>
-            </div>
-            <motion.div
-              key={difficulty}
-              initial={{ scale: 1.1 }}
-              animate={{ scale: 1 }}
-              className={cn(
-                "text-2xl font-bold",
-                difficulty === "Easy" ? "text-emerald-300" : difficulty === "Medium" ? "text-amber-300" : "text-red-300"
-              )}
-            >
-              {difficulty}
-            </motion.div>
-            <p className="mt-2 text-xs text-pink-400/70">
-              Based on time remaining
             </p>
           </div>
 
