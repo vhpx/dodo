@@ -1262,7 +1262,7 @@ function GameScreen({
       client.off("error", handleError);
       client.off("close", handleClose);
     };
-  }, [client, onWin, onTimerStart]);
+  }, [client, onWin, onTimerStart, onGoodArgument, timerStarted]);
 
   // Handle audio recording - only start after timer has started (AI finished accusation)
   useEffect(() => {
@@ -1339,7 +1339,7 @@ function GameScreen({
         try {
           client.send(
             {
-              text: `[START INTERROGATION] The suspect is accused of: "${crime}". Begin your dramatic accusation!`,
+              text: `Accused of: "${crime}". Accuse them NOW!`,
             },
             true
           );
