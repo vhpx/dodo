@@ -78,26 +78,33 @@ export class MultimodalLiveClient extends EventEmitter<MultimodalLiveClientEvent
 	}
 
 	connect(config: LiveConfig): Promise<boolean> {
+		console.log("[MultimodalLiveClient] connect() called with config:", config.model);
 		this.config = config;
 
+		console.log("[MultimodalLiveClient] Creating WebSocket to:", this.url.substring(0, 50) + "...");
 		const ws = new WebSocket(this.url);
 
 		ws.addEventListener("message", async (evt: MessageEvent) => {
 			if (evt.data instanceof Blob) {
 				this.receive(evt.data);
 			} else {
+				console.log("[MultimodalLiveClient] Received non-blob message:", evt.data);
 			}
 		});
 		return new Promise((resolve, reject) => {
 			const onError = (ev: Event) => {
+				console.error("[MultimodalLiveClient] WebSocket error:", ev);
 				this.disconnect(ws);
-				const message = `Could not connect to "${this.url}"`;
+				const message = `Could not connect to "${this.url.substring(0, 50)}..."`;
 				this.log(`server.${ev.type}`, message);
+				this.emit("error", new Error(message));
 				reject(new Error(message));
 			};
 			ws.addEventListener("error", onError);
 			ws.addEventListener("open", (ev: Event) => {
+				console.log("[MultimodalLiveClient] WebSocket opened!");
 				if (!this.config) {
+					console.error("[MultimodalLiveClient] No config available!");
 					reject("Invalid config sent to `connect(config)`");
 					return;
 				}
@@ -109,11 +116,13 @@ export class MultimodalLiveClient extends EventEmitter<MultimodalLiveClientEvent
 				const setupMessage: SetupMessage = {
 					setup: this.config,
 				};
+				console.log("[MultimodalLiveClient] Sending setup message...");
 				this._sendDirect(setupMessage);
 				this.log("client.send", "setup");
 
 				ws.removeEventListener("error", onError);
 				ws.addEventListener("close", (ev: CloseEvent) => {
+					console.log("[MultimodalLiveClient] WebSocket closed:", ev.code, ev.reason);
 					this.disconnect(ws);
 					let reason = ev.reason || "";
 					if (reason.toLowerCase().includes("error")) {
@@ -132,6 +141,7 @@ export class MultimodalLiveClient extends EventEmitter<MultimodalLiveClientEvent
 					);
 					this.emit("close", ev);
 				});
+				console.log("[MultimodalLiveClient] Connection successful, resolving promise");
 				resolve(true);
 			});
 		});

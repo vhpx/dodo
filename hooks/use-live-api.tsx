@@ -115,12 +115,23 @@ export function useLiveAPI({
   }, [client]);
 
   const connect = useCallback(async () => {
+    console.log("[useLiveAPI] connect() called");
+    console.log("[useLiveAPI] Current config:", JSON.stringify(config, null, 2));
     if (!config) {
+      console.error("[useLiveAPI] No config set!");
       throw new Error('config has not been set');
     }
+    console.log("[useLiveAPI] Disconnecting existing connection...");
     client.disconnect();
-    await client.connect(config);
-    setConnected(true);
+    console.log("[useLiveAPI] Calling client.connect with config...");
+    try {
+      await client.connect(config);
+      console.log("[useLiveAPI] client.connect succeeded!");
+      setConnected(true);
+    } catch (error) {
+      console.error("[useLiveAPI] client.connect failed:", error);
+      throw error;
+    }
   }, [client, config]);
 
   const disconnect = useCallback(async () => {
