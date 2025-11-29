@@ -33,50 +33,71 @@ export class AudioRecorder extends EventEmitter {
       throw new Error('Could not request user media');
     }
 
-    this.starting = new Promise(async (resolve) => {
-      this.stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-      });
-      this.audioContext = await audioContext({
-        sampleRate: this.sampleRate,
-      });
-      this.source = this.audioContext.createMediaStreamSource(this.stream);
+    console.log('[AudioRecorder] Starting...');
 
-      const workletName = 'audio-recorder-worklet';
-      const src = createWorketFromSrc(workletName, AudioRecordingWorklet);
-
-      await this.audioContext.audioWorklet.addModule(src);
-      this.recordingWorklet = new AudioWorkletNode(
-        this.audioContext,
-        workletName
-      );
-
-      this.recordingWorklet.port.onmessage = async (ev: MessageEvent) => {
-        // worklet processes recording floats and messages converted buffer
-        const arrayBuffer = ev.data.data.int16arrayBuffer;
-
-        if (arrayBuffer) {
-          const arrayBufferString = arrayBufferToBase64(arrayBuffer);
-          this.emit('data', arrayBufferString);
+    this.starting = new Promise(async (resolve, reject) => {
+      try {
+        console.log('[AudioRecorder] Requesting microphone access...');
+        this.stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        console.log('[AudioRecorder] Microphone access granted, tracks:', this.stream.getAudioTracks().length);
+        
+        this.audioContext = await audioContext({
+          sampleRate: this.sampleRate,
+        });
+        console.log('[AudioRecorder] AudioContext created, state:', this.audioContext.state);
+        
+        // Resume audio context if suspended (required by some browsers)
+        if (this.audioContext.state === 'suspended') {
+          console.log('[AudioRecorder] Resuming suspended AudioContext...');
+          await this.audioContext.resume();
         }
-      };
-      this.source.connect(this.recordingWorklet);
+        
+        this.source = this.audioContext.createMediaStreamSource(this.stream);
 
-      // vu meter worklet
-      const vuWorkletName = 'vu-meter';
-      await this.audioContext.audioWorklet.addModule(
-        createWorketFromSrc(vuWorkletName, VolMeterWorket)
-      );
-      this.vuWorklet = new AudioWorkletNode(this.audioContext, vuWorkletName);
-      this.vuWorklet.port.onmessage = (ev: MessageEvent) => {
-        this.emit('volume', ev.data.volume);
-      };
+        const workletName = 'audio-recorder-worklet';
+        const src = createWorketFromSrc(workletName, AudioRecordingWorklet);
 
-      this.source.connect(this.vuWorklet);
-      this.recording = true;
-      resolve();
-      this.starting = null;
+        await this.audioContext.audioWorklet.addModule(src);
+        this.recordingWorklet = new AudioWorkletNode(
+          this.audioContext,
+          workletName
+        );
+
+        this.recordingWorklet.port.onmessage = async (ev: MessageEvent) => {
+          // worklet processes recording floats and messages converted buffer
+          const arrayBuffer = ev.data.data.int16arrayBuffer;
+
+          if (arrayBuffer) {
+            const arrayBufferString = arrayBufferToBase64(arrayBuffer);
+            this.emit('data', arrayBufferString);
+          }
+        };
+        this.source.connect(this.recordingWorklet);
+
+        // vu meter worklet
+        const vuWorkletName = 'vu-meter';
+        await this.audioContext.audioWorklet.addModule(
+          createWorketFromSrc(vuWorkletName, VolMeterWorket)
+        );
+        this.vuWorklet = new AudioWorkletNode(this.audioContext, vuWorkletName);
+        this.vuWorklet.port.onmessage = (ev: MessageEvent) => {
+          this.emit('volume', ev.data.volume);
+        };
+
+        this.source.connect(this.vuWorklet);
+        this.recording = true;
+        console.log('[AudioRecorder] Recording started successfully');
+        resolve();
+        this.starting = null;
+      } catch (error) {
+        console.error('[AudioRecorder] Failed to start:', error);
+        reject(error);
+      }
     });
+    
+    return this.starting;
   }
 
   stop() {
