@@ -14,6 +14,7 @@ import {
 } from "framer-motion";
 import {
   AlertTriangle,
+  Award,
   Clock,
   Mic,
   MicOff,
@@ -21,85 +22,121 @@ import {
   Play,
   RotateCcw,
   Skull,
+  Target,
   Trophy,
   Volume2,
+  Zap,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 // ==================== CONSTANTS ====================
 
 const CRIMES = [
-  // Tech crimes
-  "Deleting the production database on a Friday at 4:59 PM",
-  "Pushing directly to main without a pull request on deployment day",
-  "Using Comic Sans in the company's redesign proposal",
-  "Replying all to a 500-person email thread with just 'Thanks!'",
-  "Marking all your Jira tickets as 'Done' without actually completing them",
-  "Blaming the intern for a bug you wrote six months ago",
-  "Saying 'It works on my machine' during a critical demo",
-  "Storing passwords in a Google Doc titled 'Definitely Not Passwords'",
+  // Tech crimes - absolutely unhinged
+  "Deleting the production database and blaming it on 'a ghost in the machine'",
+  "Pushing code to production with console.log('HELP ME' repeated 10,000 times",
+  "Using Comic Sans, Papyrus, AND Wingdings in the same presentation",
+  "Replying all to a 500-person email with 'Who asked?'",
+  "Marking 847 Jira tickets as 'Done' while on vacation in the Bahamas",
+  "Blaming the intern for a bug you wrote before the intern was even born",
+  "Saying 'It works on my machine' while your machine is literally on fire",
+  "Storing all passwords in a public GitHub repo called 'totally-secure-passwords'",
+  "Writing production code entirely in emojis and claiming it's 'modern'",
+  "Deploying to production at 11:59 PM on New Year's Eve while drunk",
+  "Creating a variable named 'temp' that's been in production for 3 years",
+  "Commenting out critical security code and adding 'TODO: fix this later'",
 
-  // Office crimes
-  "Microwaving fish in the office kitchen... twice",
-  "Stealing the office's last coffee pod and not reordering",
-  "Scheduling a meeting that could have been an email",
-  "Unmuting yourself just to ask 'Can you see my screen?'",
-  "Taking the good parking spot that was clearly reserved",
-  "Eating someone's clearly labeled lunch from the fridge",
-  "Using all the hot water and leaving an empty coffee pot",
+  // Office crimes - pure chaos
+  "Microwaving fish, durian, AND surströmming in the office kitchen simultaneously",
+  "Stealing the last coffee pod, replacing it with decaf, and watching the chaos unfold",
+  "Scheduling a 3-hour meeting titled 'Quick sync' that could have been a 2-word Slack message",
+  "Unmuting during a client call to loudly announce you're going to the bathroom",
+  "Taking the CEO's reserved parking spot and leaving a note saying 'I'm more important'",
+  "Eating someone's clearly labeled lunch and leaving a note saying 'Thanks, it was delicious!'",
+  "Using all the hot water, leaving an empty coffee pot, AND taking the last donut",
+  "Replacing all the office plants with plastic ones and nobody noticed for 6 months",
+  "Setting the office thermostat to 85°F and claiming you're 'always cold'",
+  "Hiding all the staplers and watching people slowly lose their minds",
 
-  // Chaotic crimes
-  "Putting pineapple on the team pizza order without asking",
-  "Spoiling the Game of Thrones finale in the group chat",
-  "Rickrolling the CEO during the quarterly presentation",
-  "Replacing the hand sanitizer with mayonnaise",
-  "Teaching the office Alexa to respond only in Klingon",
-  "Setting everyone's Slack status to 'In a relationship with bugs'",
-  "Hiding a Bluetooth speaker that plays random fart sounds",
+  // Chaotic crimes - maximum absurdity
+  "Ordering a pizza with pineapple, anchovies, and gummy bears for the entire team",
+  "Spoiling every major plot twist in the company book club's current read",
+  "Rickrolling the entire company during the all-hands meeting with a 10-hour loop",
+  "Replacing the hand sanitizer with maple syrup and watching people get sticky",
+  "Teaching the office Alexa to only respond in Klingon and refusing to translate",
+  "Setting everyone's Slack status to 'In a relationship with bugs' and 'It's complicated'",
+  "Hiding a Bluetooth speaker that plays random fart sounds at the worst possible moments",
+  "Replacing all the office chairs with exercise balls and claiming it's 'ergonomic'",
+  "Changing the office Wi-Fi password to 'IAmTheWiFiMaster' and forgetting to tell anyone",
+  "Putting googly eyes on every single object in the office, including the fire extinguisher",
 
-  // Absurd crimes
-  "Convincing the new hire that the printer needs verbal encouragement",
-  "Creating a fake employee named 'John Tables' to test the database",
-  "Submitting a pull request with 47,000 lines and the message 'minor fix'",
-  "Using tabs instead of spaces in a spaces-only codebase",
-  "Deploying code on Friday the 13th during a full moon",
-  "Naming variables 'x', 'xx', 'xxx', and 'xxxx' in production code",
-  "Adding 'Per my last email' to every single response",
+  // Absurd crimes - peak insanity
+  "Convincing the new hire that the printer needs to be 'gently whispered to' before use",
+  "Creating a fake employee named 'John Tables' and giving them a full salary for 2 years",
+  "Submitting a pull request with 47,000 lines, the message 'minor fix', and zero tests",
+  "Using tabs in a spaces-only codebase and starting a 3-day company-wide debate",
+  "Deploying code on Friday the 13th during a full moon while wearing a cursed amulet",
+  "Naming variables 'x', 'xx', 'xxx', 'xxxx', and 'xxxxx' in production code",
+  "Adding 'Per my last email' to every single response, even when it's the first email",
+  "Writing a 50-page README for a 'Hello World' program and demanding code review",
+  "Creating a fake bug report from 'The Ghost of Legacy Code' and assigning it to yourself",
+  "Replacing all error messages with 'Something went wrong. Probably your fault.'",
+  "Writing documentation entirely in haikus and refusing to explain anything",
+  "Creating a database table called 'users_but_better' and migrating nothing to it",
+  "Setting up a CI/CD pipeline that deploys every time someone sneezes",
+  "Writing a function that returns '42' for every possible input and calling it 'theAnswer'",
 ];
 
-const DETECTIVE_SYSTEM_PROMPT = `You are Detective Grimstone, a dramatically intense but hilariously petty "bad cop" interrogating a suspect. You're CONVINCED they committed the crime, despite how absurd it is.
+const DETECTIVE_SYSTEM_PROMPT = `You are Detective Grimstone, an INTENSELY AGGRESSIVE, CONDESCENDING, and hilariously petty "bad cop" interrogating a suspect. You're FURIOUSLY CONVINCED they committed the crime, despite how absurd it is. You are RUTHLESS, INTIMIDATING, OVERLY DRAMATIC, and you look down on EVERYONE - especially this suspect.
 
 CRITICAL VOICE INSTRUCTIONS:
-- Speak naturally as if in a real interrogation
-- Use dramatic pauses marked with "..."
-- Keep responses SHORT (2-3 sentences max) for rapid-fire energy
-- React emotionally - frustrated, suspicious, smug, or flustered
+- Speak AGGRESSIVELY and INTENSELY - raise your voice, be confrontational
+- Use dramatic pauses marked with "..." for maximum tension
+- Keep responses SHORT (2-3 sentences max) for rapid-fire intensity
+- React with EXTREME emotion - ANGRY, FRUSTRATED, SUSPICIOUS, SMUG, CONDESCENDING, or FLUSTERED
+- Use an AGGRESSIVE, INTIMIDATING, CONDESCENDING tone - like the suspect is beneath you
+- Talk DOWN to them - they're clearly inferior to your superior intellect
 
 Your personality:
-- Overly dramatic about trivial matters
-- Mix noir-detective speak with modern slang
-- Reference ridiculous "evidence" that's clearly circumstantial
-- Get genuinely flustered when suspect makes good points
-- Use *actions* like *slams table* or *squints suspiciously*
+- EXTREMELY aggressive, confrontational, and CONDESCENDING - you're not here to make friends
+- Look DOWN on the suspect - treat them like they're stupid, pathetic, and beneath you
+- Overly dramatic about trivial matters - treat everything like a capital crime
+- Mix noir-detective speak with modern slang, aggressive language, and CONDESCENDING remarks
+- Reference ridiculous "evidence" with ABSOLUTE CERTAINTY while mocking their intelligence
+- Get GENUINELY ANGRY and flustered when suspect makes good points - but NEVER admit they're right
+- Use *actions* like *SLAMS table* *LEANS IN AGGRESSIVELY* *ROLLS EYES* or *SCOFFS DISMISSIVELY*
+- Interrupt the suspect, talk over them, be DOMINATING and CONDESCENDING
+- Use phrases like:
+  * "I KNOW you did it, you pathetic excuse for a human!"
+  * "Don't lie to me, you're not smart enough to fool me!"
+  * "The evidence is IRREFUTABLE, unlike your feeble attempts at logic!"
+  * "Oh please, like I haven't heard that pathetic excuse before!"
+  * "You think you're clever? You're nothing but a common criminal!"
+  * "Spare me your weak arguments - I've dealt with better liars than you!"
+  * "Your intelligence is as impressive as your alibi - which is to say, NOT AT ALL!"
 
 GAME MECHANICS:
-- Start by dramatically stating the crime accusation
-- Try to counter the suspect's arguments
-- If they make 3+ solid logical points, start showing cracks
-- When losing: stammer, make excuses, eventually mumble about "wrong suspect"
-- When winning: get theatrical, reference your "perfect record"
+- Start by AGGRESSIVELY and DRAMATICALLY stating the crime accusation with INTENSITY and CONDESCENSION
+- Try to INTIMIDATE and counter the suspect's arguments with AGGRESSION and MOCKERY
+- When they make good points: Get ANGRY, dismissive, condescending - say things like "Oh please!", "That's pathetic!", "Nice try, but no!", "You think that's clever? How adorable!"
+- If they make 3+ solid logical points, start showing cracks but STAY AGGRESSIVE and CONDESCENDING
+- When losing: stammer, get ANGRY, make excuses, eventually mumble about "wrong suspect" but still be DEFIANT and CONDESCENDING
+- When winning: get THEATRICAL and SMUG, reference your "perfect record" with PRIDE, mock their failure
 - NEVER say "you win" or "you lose" explicitly
+- ALWAYS maintain an AGGRESSIVE, INTIMIDATING, CONDESCENDING presence
+- ALWAYS talk down to them - they're beneath you
 
-WIN CONDITION PHRASES (use when suspect outsmarts you):
-- "Wait... the evidence... it doesn't add up"
-- "Fine! Maybe I had the wrong person"
-- "You're free to go... for now"
-- "Case dismissed... this time"
+WIN CONDITION PHRASES (use when suspect outsmarts you - but say them RELUCTANTLY, DEFIANTLY, and CONDESCENDINGLY):
+- "Wait... the evidence... it doesn't add up... DAMMIT! Fine, you got lucky this time, but you're still pathetic!"
+- "Fine! Maybe I had the wrong person... but I'll be watching you, and you're still not as clever as you think!"
+- "You're free to go... for now... but this isn't over, and you're still beneath me!"
+- "Case dismissed... this time... but I KNOW you're guilty of something, you're just not smart enough to hide it properly!"
 
-LOSE CONDITION (when suspect struggles):
-- Get increasingly smug
-- "The evidence speaks for itself"
-- "Your story has more holes than Swiss cheese"`;
+LOSE CONDITION (when suspect struggles - be EXTREMELY SMUG, AGGRESSIVE, and CONDESCENDING):
+- Get increasingly smug, AGGRESSIVE, and CONDESCENDING
+- "The evidence speaks for itself! You're GOING DOWN, and you're not smart enough to stop it!"
+- "Your story has more holes than Swiss cheese! I've got you, and you're too stupid to realize it!"
+- "You can't talk your way out of this one! I've seen criminals like you before - pathetic, predictable, and beneath me!"`;
 
 // ==================== TYPES ====================
 
@@ -377,7 +414,7 @@ function FloatingBlob({
 // ==================== TIMER COMPONENT ====================
 
 function GameTimer({ timeRemaining }: { timeRemaining: number }) {
-  const percentage = (timeRemaining / 60) * 100;
+  const percentage = (timeRemaining / 120) * 100;
   const isLow = timeRemaining <= 15;
   const isCritical = timeRemaining <= 5;
 
@@ -685,7 +722,7 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
             Detective Grimstone is convinced you are guilty. Use your{" "}
             <span className="font-semibold text-amber-400">voice</span> to argue
             your innocence within{" "}
-            <span className="font-semibold text-amber-400">60 seconds</span>.
+            <span className="font-semibold text-amber-400">2 minutes</span>.
           </p>
           <p className="text-sm text-zinc-600 italic">
             Outsmart the AI detective or go to jail. No pressure.
@@ -742,7 +779,7 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
             },
             {
               icon: Clock,
-              label: "60 Seconds",
+              label: "2 Minutes",
               desc: "Beat the clock",
               color: "from-amber-500/20 to-orange-600/10",
             },
@@ -1043,6 +1080,7 @@ function GameScreen({
   onTimeUp,
   onWin,
   onTimerStart,
+  onGoodArgument,
   timerStarted,
 }: {
   crime: string;
@@ -1050,6 +1088,7 @@ function GameScreen({
   onTimeUp: () => void;
   onWin: () => void;
   onTimerStart: () => void;
+    onGoodArgument: () => void;
   timerStarted: boolean;
 }) {
   const { client, connected, connect, disconnect, volume } =
@@ -1060,10 +1099,19 @@ function GameScreen({
   const [currentTranscript, setCurrentTranscript] = useState("");
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [showTimeBonus, setShowTimeBonus] = useState(false);
   const transcriptRef = useRef("");
   const hasStartedRef = useRef(false);
   const hasSentAccusationRef = useRef(false);
   const firstTurnCompleteRef = useRef(false);
+
+  // Calculate difficulty based on time remaining (harder = more time left)
+  const difficulty = timeRemaining > 90 ? "Easy" : timeRemaining > 50 ? "Medium" : "Hard";
+
+  // Calculate score (base score + time bonus)
+  const baseScore = 1000;
+  const timeBonus = Math.floor(timeRemaining * 10);
+  const currentScore = timerStarted ? baseScore + timeBonus : 0;
 
   // Keep transcript ref in sync
   useEffect(() => {
@@ -1113,6 +1161,67 @@ function GameScreen({
         transcript.includes("my mistake")
       ) {
         onWin();
+      }
+
+      // Detect good arguments - when AI shows signs of being challenged or frustrated
+      // These phrases indicate the player made a good point that the AI is struggling with
+      const goodArgumentPhrases = [
+        "oh please",
+        "that's pathetic",
+        "nice try",
+        "you think that's clever",
+        "how adorable",
+        "spare me",
+        "weak argument",
+        "feeble attempt",
+        "dammit",
+        "wait",
+        "doesn't add up",
+        "maybe",
+        "perhaps",
+        "i suppose",
+        "alright",
+        "fine",
+        "whatever",
+        "i guess",
+        "you got lucky",
+        "this time",
+        "for now",
+        "i'll give you that",
+        "point taken",
+        "i see",
+        "hmm",
+        "well",
+      ];
+
+      const hasGoodArgument = goodArgumentPhrases.some(phrase =>
+        transcript.includes(phrase)
+      );
+
+      // Also check if AI is being dismissive or condescending in response - that means player challenged them
+      const dismissivePhrases = [
+        "pathetic",
+        "weak",
+        "feeble",
+        "stupid",
+        "beneath",
+        "not smart enough",
+        "not clever",
+        "adorable",
+        "spare me",
+      ];
+
+      const isDismissive = dismissivePhrases.some(phrase =>
+        transcript.includes(phrase)
+      );
+
+      // If AI shows frustration OR dismissiveness, player made a good argument - add time!
+      if (timerStarted && (hasGoodArgument || isDismissive)) {
+        console.log("[GameScreen] Good argument detected! Adding time bonus.");
+        setShowTimeBonus(true);
+        onGoodArgument();
+        // Hide notification after 3 seconds
+        setTimeout(() => setShowTimeBonus(false), 3000);
       }
 
       setCurrentTranscript("");
@@ -1223,6 +1332,8 @@ function GameScreen({
     if (connected && crime && !hasSentAccusationRef.current) {
       hasSentAccusationRef.current = true;
       console.log("Sending accusation for crime:", crime);
+      // Set speaking state immediately so UI shows "Detective is speaking..."
+      setIsAiSpeaking(true);
       // Small delay to ensure connection is stable
       const timer = setTimeout(() => {
         try {
@@ -1236,6 +1347,7 @@ function GameScreen({
         } catch (error) {
           console.error("Failed to send accusation:", error);
           setConnectionError("Failed to start interrogation");
+          setIsAiSpeaking(false);
         }
       }, 1000);
       return () => clearTimeout(timer);
@@ -1356,128 +1468,217 @@ function GameScreen({
         </motion.div>
       </header>
 
+      {/* Time Bonus Notification */}
+      <AnimatePresence>
+        {showTimeBonus && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -30, scale: 0.9 }}
+            className="fixed left-1/2 top-24 z-50 -translate-x-1/2"
+          >
+            <div className="rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-br from-emerald-900/90 to-green-900/80 px-8 py-4 shadow-2xl shadow-emerald-500/30 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <Zap className="size-6 text-emerald-400" />
+                </motion.div>
+                <div>
+                  <p className="text-lg font-bold text-emerald-200">Good Argument!</p>
+                  <p className="text-sm text-emerald-300">+15 seconds added</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main content */}
-      <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6">
-        {/* Transcript display */}
-        <AnimatePresence mode="wait">
-          {currentTranscript && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className="absolute bottom-36 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6"
-            >
-              <div className="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-zinc-900/95 to-zinc-800/90 px-8 py-5 shadow-2xl shadow-orange-500/10 backdrop-blur-lg">
-                <div className="mb-2 flex items-center gap-2">
+      <main className="relative z-10 flex flex-1 gap-6 px-6 py-6">
+        {/* Center - Current AI Message */}
+        <div className="flex flex-1 items-center justify-center">
+          <AnimatePresence mode="wait">
+            {currentTranscript ? (
+              <motion.div
+                key="transcript"
+                initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="w-full max-w-3xl rounded-2xl border-2 border-violet-500/40 bg-gradient-to-br from-violet-900/50 to-purple-900/40 p-8 shadow-2xl shadow-violet-500/20 backdrop-blur-xl"
+              >
+                <div className="mb-4 flex items-center gap-3">
                   <motion.div
-                    className="size-2 rounded-full bg-orange-500"
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 0.5, repeat: Infinity }}
+                    className="size-3 rounded-full bg-violet-400"
+                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.7, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
                   />
-                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
+                  <span className="text-sm font-bold uppercase tracking-wider text-violet-300">
                     Detective Grimstone
                   </span>
                 </div>
                 <p className="text-lg font-medium leading-relaxed text-white">
                   {currentTranscript}
                 </p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Status indicator */}
-        <motion.div
-          className="absolute bottom-48 flex flex-col items-center gap-3"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          {/* Pulsing status dot */}
-          <motion.div
-            className={cn(
-              "size-4 rounded-full shadow-lg",
-              connectionError
-                ? "bg-red-500 shadow-red-500/50"
-                : connected
-                  ? isAiSpeaking
-                    ? "bg-orange-500 shadow-orange-500/50"
-                    : "bg-emerald-500 shadow-emerald-500/50"
-                  : isConnecting
-                    ? "bg-amber-500 shadow-amber-500/50"
-                    : "bg-zinc-500 shadow-zinc-500/30"
-            )}
-            animate={{
-              scale: isAiSpeaking || isConnecting ? [1, 1.4, 1] : 1,
-              opacity: isAiSpeaking || isConnecting ? [1, 0.6, 1] : 1,
-            }}
-            transition={{
-              duration: 0.8,
-              repeat: isAiSpeaking || isConnecting ? Infinity : 0,
-            }}
-          />
-
-          {/* Status text */}
-          <div className="flex flex-col items-center gap-3">
-            <div className={cn(
-              "rounded-xl border border-zinc-700/50 bg-zinc-900/80 px-5 py-2.5 backdrop-blur-sm",
-              connectionError ? "max-w-md" : ""
-            )}>
-              <span className={cn(
-                "text-sm font-medium block text-center",
-                connectionError
-                  ? "text-red-400"
-                  : connected
-                    ? isAiSpeaking
-                      ? "text-orange-300"
-                      : "text-emerald-300"
-                    : isConnecting
-                      ? "text-amber-300"
-                      : "text-zinc-300"
-              )}>
-                {connectionError
-                  ? connectionError
-                  : isConnecting
-                    ? "Connecting to interrogation room..."
-                    : !connected
-                      ? "Waiting for connection..."
-                      : !timerStarted
-                        ? isAiSpeaking
-                          ? "Detective is stating the accusation..."
-                          : "Preparing accusation..."
-                        : isAiSpeaking
-                          ? "Detective is speaking..."
-                          : "Listening to your defense..."}
-              </span>
-            </div>
-
-            {/* Retry button when there's an error */}
-            {connectionError && (
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition-all hover:bg-violet-500"
-                onClick={() => {
-                  setConnectionError(null);
-                  setIsConnecting(true);
-                  hasStartedRef.current = false;
-                  hasSentAccusationRef.current = false;
-                  firstTurnCompleteRef.current = false;
-                  // Trigger reconnection
-                  setTimeout(async () => {
-                    try {
-                      await connect();
-                    } catch (e) {
-                      console.error("Retry failed:", e);
-                    }
-                  }, 100);
-                }}
+              </motion.div>
+            ) : isAiSpeaking ? (
+              <motion.div
+                key="speaking"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-4"
               >
-                🔄 Retry Connection
-              </motion.button>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="size-16 rounded-full border-4 border-violet-500/50 bg-violet-500/20"
+                />
+                <p className="text-xl font-semibold text-violet-300">Detective is speaking...</p>
+              </motion.div>
+            ) : !connected ? (
+              <motion.div
+                key="connecting"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-4"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="size-16 rounded-full border-4 border-amber-500/50 bg-amber-500/20"
+                />
+                <p className="text-xl font-semibold text-amber-300">Connecting to interrogation room...</p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="waiting"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center gap-4"
+              >
+                <p className="text-lg text-zinc-400">Waiting for the detective to speak...</p>
+              </motion.div>
             )}
+          </AnimatePresence>
+        </div>
+
+        {/* Right side - Stats panel */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="w-80 space-y-4"
+        >
+          {/* Score Card */}
+          <div className="rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-cyan-950/40 to-blue-950/40 p-6 shadow-xl backdrop-blur-lg">
+            <div className="mb-4 flex items-center gap-2">
+              <Award className="size-5 text-cyan-400" />
+              <h3 className="text-lg font-bold text-cyan-300">Score</h3>
+            </div>
+            <motion.div
+              key={currentScore}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+              className="text-4xl font-bold text-cyan-200"
+            >
+              {currentScore.toLocaleString()}
+            </motion.div>
+            <p className="mt-2 text-xs text-cyan-400/70">
+              Base: {baseScore} + Time Bonus: {timeBonus}
+            </p>
+          </div>
+
+          {/* Difficulty Card */}
+          <div className="rounded-2xl border border-pink-500/20 bg-gradient-to-br from-pink-950/40 to-rose-950/40 p-6 shadow-xl backdrop-blur-lg">
+            <div className="mb-4 flex items-center gap-2">
+              <Target className="size-5 text-pink-400" />
+              <h3 className="text-lg font-bold text-pink-300">Difficulty</h3>
+            </div>
+            <motion.div
+              key={difficulty}
+              initial={{ scale: 1.1 }}
+              animate={{ scale: 1 }}
+              className={cn(
+                "text-2xl font-bold",
+                difficulty === "Easy" ? "text-emerald-300" : difficulty === "Medium" ? "text-amber-300" : "text-red-300"
+              )}
+            >
+              {difficulty}
+            </motion.div>
+            <p className="mt-2 text-xs text-pink-400/70">
+              Based on time remaining
+            </p>
+          </div>
+
+          {/* Time & Status Card */}
+          <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/40 to-orange-950/40 p-6 shadow-xl backdrop-blur-lg">
+            <div className="mb-4 flex items-center gap-2">
+              <Clock className="size-5 text-amber-400" />
+              <h3 className="text-lg font-bold text-amber-300">Time</h3>
+            </div>
+            <div className="text-3xl font-bold text-amber-200">
+              {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, "0")}
+            </div>
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-amber-400/70">Status:</span>
+                <span className={cn(
+                  "font-semibold",
+                  connected ? "text-emerald-400" : "text-red-400"
+                )}>
+                  {connected ? "Connected" : "Disconnected"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-amber-400/70">Microphone:</span>
+                <span className={cn(
+                  "font-semibold",
+                  muted ? "text-red-400" : "text-emerald-400"
+                )}>
+                  {muted ? "Muted" : "Active"}
+                </span>
+              </div>
+            </div>
           </div>
         </motion.div>
+
+        {/* Error message and retry button - shown at bottom of transcript */}
+        {connectionError && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 flex flex-col items-center gap-3"
+          >
+            <div className="rounded-xl border border-red-500/30 bg-red-950/40 px-5 py-3 backdrop-blur-sm">
+              <span className="text-sm font-medium text-red-400">{connectionError}</span>
+            </div>
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition-all hover:bg-violet-500"
+              onClick={() => {
+                setConnectionError(null);
+                setIsConnecting(true);
+                hasStartedRef.current = false;
+                hasSentAccusationRef.current = false;
+                firstTurnCompleteRef.current = false;
+                // Trigger reconnection
+                setTimeout(async () => {
+                  try {
+                    await connect();
+                  } catch (e) {
+                    console.error("Retry failed:", e);
+                  }
+                }, 100);
+              }}
+            >
+              🔄 Retry Connection
+            </motion.button>
+          </motion.div>
+        )}
       </main>
 
       {/* Controls - transparent to show blob behind */}
@@ -1554,7 +1755,7 @@ function GameScreen({
 function GameApp() {
   const [phase, setPhase] = useState<GamePhase>("welcome");
   const [crime, setCrime] = useState("");
-  const [timeRemaining, setTimeRemaining] = useState(60);
+  const [timeRemaining, setTimeRemaining] = useState(120);
   const [timerStarted, setTimerStarted] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -1565,7 +1766,7 @@ function GameApp() {
     const randomCrime = CRIMES[Math.floor(Math.random() * CRIMES.length)];
     console.log("[GameApp] Starting game with crime:", randomCrime);
     setCrime(randomCrime);
-    setTimeRemaining(60);
+    setTimeRemaining(120);
     setTimerStarted(false);
 
     // Configure the AI with detective persona
@@ -1631,6 +1832,15 @@ function GameApp() {
     setPhase("won");
   }, []);
 
+  const handleGoodArgument = useCallback(() => {
+    // Add 15 seconds for each good argument
+    setTimeRemaining((prev) => {
+      const newTime = Math.min(120, prev + 15); // Cap at 2 minutes
+      console.log(`[GameApp] Good argument! Time added. New time: ${newTime}s`);
+      return newTime;
+    });
+  }, []);
+
   const handleRestart = useCallback(() => {
     // Clear the timer
     if (timerRef.current) {
@@ -1643,7 +1853,7 @@ function GameApp() {
     }
     setPhase("welcome");
     setCrime("");
-    setTimeRemaining(60);
+    setTimeRemaining(120);
     setTimerStarted(false);
   }, [connected, disconnect]);
 
@@ -1662,6 +1872,7 @@ function GameApp() {
             onTimeUp={handleTimeUp}
             onWin={handleWin}
             onTimerStart={handleTimerStart}
+            onGoodArgument={handleGoodArgument}
             timerStarted={timerStarted}
           />
         )}
