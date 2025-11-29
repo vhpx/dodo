@@ -107,6 +107,13 @@ type GamePhase = "welcome" | "playing" | "won" | "lost";
 
 // ==================== FLOATING BLOB COMPONENT ====================
 
+// Fixed particle positions for blob
+const BLOB_PARTICLES = [
+  { left: 35, top: 30 }, { left: 60, top: 35 }, { left: 45, top: 65 },
+  { left: 70, top: 55 }, { left: 30, top: 50 }, { left: 55, top: 40 },
+  { left: 40, top: 70 }, { left: 65, top: 45 },
+];
+
 function FloatingBlob({
   isActive,
   volume,
@@ -123,28 +130,29 @@ function FloatingBlob({
     mass: 0.5,
   });
 
-  const blobScale = useTransform(amplitudeSpring, (v) => 0.8 + v * 0.6);
+  const blobScale = useTransform(amplitudeSpring, (v) => 0.85 + v * 0.5);
   const blobRotate = useTransform(amplitudeSpring, (v) => -15 + v * 40);
   const innerGlow = useTransform(amplitudeSpring, (v) =>
-    Math.min(0.9, 0.3 + v * 0.7)
+    Math.min(0.95, 0.4 + v * 0.6)
   );
-  const outerScale = useTransform(amplitudeSpring, (v) => 1.3 + v * 0.5);
+  const outerScale = useTransform(amplitudeSpring, (v) => 1.2 + v * 0.6);
   const outerOpacity = useTransform(amplitudeSpring, (v) =>
-    Math.min(0.6, 0.2 + v * 0.5)
+    Math.min(0.7, 0.25 + v * 0.5)
   );
+  const ringScale = useTransform(amplitudeSpring, (v) => 1 + v * 0.3);
 
-  // Dynamic color hues
-  const huePrimary = useTransform(amplitudeSpring, (v) => 350 + v * 30);
-  const hueSecondary = useTransform(amplitudeSpring, (v) => 20 + v * 40);
-  const hueTertiary = useTransform(amplitudeSpring, (v) => 280 + v * 50);
+  // Neon pastel color hues - cyan, purple, pink
+  const huePrimary = useTransform(amplitudeSpring, (v) => 280 + v * 40); // Purple to pink
+  const hueSecondary = useTransform(amplitudeSpring, (v) => 180 + v * 30); // Cyan to teal
+  const hueTertiary = useTransform(amplitudeSpring, (v) => 320 + v * 30); // Pink to magenta
 
-  const blobGradient = useMotionTemplate`radial-gradient(circle at 30% 25%, hsl(${huePrimary} 85% 55% / 0.7), transparent 55%), radial-gradient(circle at 70% 30%, hsl(${hueSecondary} 90% 60% / 0.65), transparent 50%), radial-gradient(circle at 50% 75%, hsl(${hueTertiary} 80% 50% / 0.6), transparent 55%)`;
+  const blobGradient = useMotionTemplate`radial-gradient(circle at 30% 25%, hsl(${huePrimary} 70% 70% / 0.8), transparent 55%), radial-gradient(circle at 70% 30%, hsl(${hueSecondary} 65% 65% / 0.7), transparent 50%), radial-gradient(circle at 50% 75%, hsl(${hueTertiary} 60% 65% / 0.65), transparent 55%)`;
 
-  const coreGradient = useMotionTemplate`radial-gradient(circle at 50% 50%, hsl(${huePrimary} 100% 85% / 0.4), transparent 60%)`;
+  const coreGradient = useMotionTemplate`radial-gradient(circle at 50% 50%, hsl(${hueSecondary} 80% 85% / 0.5), transparent 55%)`;
 
   useEffect(() => {
-    const baseLevel = isActive ? 0.25 : 0.1;
-    const speakingBoost = isSpeaking ? 0.3 : 0;
+    const baseLevel = isActive ? 0.3 : 0.15;
+    const speakingBoost = isSpeaking ? 0.35 : 0;
     const volumeBoost = volume * 5;
     const target = Math.min(1.2, baseLevel + speakingBoost + volumeBoost);
     amplitude.set(target);
@@ -152,47 +160,102 @@ function FloatingBlob({
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* Outer atmospheric glow */}
+      {/* Outermost ring */}
       <motion.div
-        className="absolute aspect-square w-[500px] rounded-full blur-3xl"
+        className="absolute aspect-square w-[700px] rounded-full border border-violet-400/15"
+        style={{ scale: ringScale, filter: "blur(2px)" }}
+        animate={{
+          rotate: [0, 360],
+          opacity: [0.2, 0.4, 0.2],
+        }}
+        transition={{
+          rotate: { duration: 40, repeat: Infinity, ease: "linear" },
+          opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+        }}
+      />
+
+      {/* Outer atmospheric glow - neon pastel, extra wide and blurry */}
+      <motion.div
+        className="absolute aspect-square w-[850px] rounded-full"
         style={{
           scale: outerScale,
           opacity: outerOpacity,
           background:
-            "radial-gradient(circle, rgba(220, 38, 38, 0.3) 0%, rgba(251, 146, 60, 0.2) 40%, transparent 70%)",
+            "radial-gradient(circle, rgba(167, 139, 250, 0.4) 0%, rgba(96, 165, 250, 0.3) 30%, rgba(244, 114, 182, 0.2) 50%, rgba(129, 230, 217, 0.1) 70%, transparent 85%)",
+          filter: "blur(80px)",
         }}
         animate={{
           rotate: [0, 360],
         }}
         transition={{
-          duration: 30,
+          duration: 25,
           repeat: Infinity,
           ease: "linear",
         }}
       />
 
-      {/* Secondary glow ring */}
+      {/* Extra ambient glow layer */}
       <motion.div
-        className="absolute aspect-square w-[400px] rounded-full blur-2xl"
+        className="absolute aspect-square w-[750px] rounded-full"
         style={{
-          opacity: innerGlow,
+          background:
+            "radial-gradient(circle, rgba(129, 230, 217, 0.25) 0%, rgba(167, 139, 250, 0.2) 40%, transparent 70%)",
+          filter: "blur(100px)",
         }}
         animate={{
           scale: [1, 1.1, 1],
+          rotate: [0, 180, 360],
+        }}
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Secondary glow ring */}
+      <motion.div
+        className="absolute aspect-square w-[600px] rounded-full"
+        style={{
+          opacity: innerGlow,
+          filter: "blur(60px)",
+        }}
+        animate={{
+          scale: [1, 1.15, 1],
           rotate: [0, -180, -360],
         }}
         transition={{
-          duration: 20,
+          duration: 18,
           repeat: Infinity,
           ease: "easeInOut",
         }}
       >
-        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-red-500/30 via-orange-500/20 to-yellow-500/25" />
+        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-400/50 via-cyan-400/40 to-pink-400/35" />
       </motion.div>
 
-      {/* Main blob */}
+      {/* Pulsing rings when speaking */}
+      {isSpeaking && (
+        <>
+          <motion.div
+            className="absolute aspect-square w-[450px] rounded-full border-2 border-cyan-400/30"
+            style={{ filter: "blur(3px)" }}
+            initial={{ scale: 1, opacity: 0.5 }}
+            animate={{ scale: 2.5, opacity: 0 }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <motion.div
+            className="absolute aspect-square w-[450px] rounded-full border-2 border-violet-400/30"
+            style={{ filter: "blur(3px)" }}
+            initial={{ scale: 1, opacity: 0.5 }}
+            animate={{ scale: 2.5, opacity: 0 }}
+            transition={{ duration: 2, repeat: Infinity, delay: 0.7 }}
+          />
+        </>
+      )}
+
+      {/* Main blob - wider and blurrier */}
       <motion.div
-        className="relative aspect-square w-[280px]"
+        className="relative aspect-square w-[450px]"
         style={{
           scale: blobScale,
           rotate: blobRotate,
@@ -207,58 +270,106 @@ function FloatingBlob({
           ],
         }}
         transition={{
-          duration: 8,
+          duration: 6,
           repeat: Infinity,
           ease: "easeInOut",
         }}
       >
-        {/* Blob gradient fill */}
+        {/* Blob gradient fill - neon pastel, extra blurry */}
         <motion.div
-          className="absolute inset-0 rounded-[inherit] blur-xl"
-          style={{ background: blobGradient }}
+          className="absolute inset-0 rounded-[inherit]"
+          style={{
+            background: blobGradient,
+            filter: "blur(40px)",
+          }}
         />
 
-        {/* Inner core glow */}
+        {/* Solid inner blob - soft pastel gradient, blurred */}
         <motion.div
-          className="absolute inset-[15%] rounded-[inherit] blur-lg"
-          style={{ background: coreGradient }}
+          className="absolute inset-[5%] rounded-[inherit]"
+          style={{
+            background: "radial-gradient(circle at 40% 35%, rgba(129, 230, 217, 0.85) 0%, rgba(167, 139, 250, 0.75) 45%, rgba(244, 114, 182, 0.65) 100%)",
+            filter: "blur(25px)",
+          }}
         />
 
-        {/* Specular highlight */}
+        {/* Inner core glow - softer */}
+        <motion.div
+          className="absolute inset-[15%] rounded-[inherit]"
+          style={{
+            background: coreGradient,
+            filter: "blur(30px)",
+          }}
+        />
+
+        {/* Specular highlight - softer */}
         <motion.div
           className="absolute inset-0 rounded-[inherit]"
           style={{
             background:
-              "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.25) 0%, transparent 50%)",
+              "radial-gradient(ellipse at 35% 25%, rgba(255,255,255,0.4) 0%, transparent 50%)",
+            filter: "blur(15px)",
           }}
+        />
+
+        {/* Hot spot - blurrier */}
+        <motion.div
+          className="absolute left-[25%] top-[20%] h-16 w-24 rounded-full bg-white/30"
+          style={{ filter: "blur(20px)" }}
+          animate={{
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
         />
       </motion.div>
 
-      {/* Particle effects */}
+      {/* Particle effects with fixed positions - pastel colors, blurred */}
       <div className="pointer-events-none absolute inset-0">
-        {[...Array(8)].map((_, i) => (
+        {BLOB_PARTICLES.map((pos, i) => (
           <motion.div
-            key={i}
-            className="absolute h-2 w-2 rounded-full bg-orange-400/60"
+            key={`blob-p-${i}`}
+            className="absolute h-3 w-3 rounded-full"
             style={{
-              left: `${30 + Math.random() * 40}%`,
-              top: `${30 + Math.random() * 40}%`,
+              left: `${pos.left}%`,
+              top: `${pos.top}%`,
+              background: i % 3 === 0 ? "rgba(129, 230, 217, 0.7)" : i % 3 === 1 ? "rgba(167, 139, 250, 0.7)" : "rgba(244, 114, 182, 0.7)",
+              boxShadow: i % 3 === 0 ? "0 0 20px rgba(129, 230, 217, 0.5)" : i % 3 === 1 ? "0 0 20px rgba(167, 139, 250, 0.5)" : "0 0 20px rgba(244, 114, 182, 0.5)",
+              filter: "blur(4px)",
             }}
             animate={{
-              opacity: [0, 0.8, 0],
-              scale: [0.5, 1.5, 0.5],
-              x: [0, (Math.random() - 0.5) * 100],
-              y: [0, (Math.random() - 0.5) * 100],
+              opacity: [0.3, 0.8, 0.3],
+              scale: [0.6, 1.5, 0.6],
+              x: [0, (i % 2 === 0 ? 30 : -30), 0],
+              y: [0, (i % 2 === 0 ? -20 : 20), 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 3 + (i * 0.3),
               repeat: Infinity,
-              delay: i * 0.4,
+              delay: i * 0.2,
               ease: "easeInOut",
             }}
           />
         ))}
       </div>
+
+      {/* Orbiting particles - pastel neon, blurred */}
+      <motion.div
+        className="absolute aspect-square w-[500px]"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="absolute left-0 top-1/2 h-3 w-3 -translate-y-1/2 rounded-full bg-cyan-300/70 shadow-[0_0_25px_rgba(103,232,249,0.6)]" style={{ filter: "blur(3px)" }} />
+        <div className="absolute right-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-violet-300/70 shadow-[0_0_20px_rgba(196,181,253,0.6)]" style={{ filter: "blur(3px)" }} />
+      </motion.div>
+
+      <motion.div
+        className="absolute aspect-square w-[580px]"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-pink-300/70 shadow-[0_0_20px_rgba(249,168,212,0.6)]" style={{ filter: "blur(3px)" }} />
+        <div className="absolute left-1/2 bottom-0 h-2 w-2 -translate-x-1/2 rounded-full bg-teal-300/70 shadow-[0_0_18px_rgba(94,234,212,0.6)]" style={{ filter: "blur(3px)" }} />
+      </motion.div>
     </div>
   );
 }
@@ -964,6 +1075,7 @@ function GameScreen({
     if (!client) return;
 
     const handleContent = (content: unknown) => {
+      console.log("[GameScreen] Received content:", content);
       const contentObj = content as {
         modelTurn?: { parts?: Array<{ text?: string }> };
       };
@@ -980,11 +1092,13 @@ function GameScreen({
     };
 
     const handleTurnComplete = () => {
+      console.log("[GameScreen] Turn complete");
       setIsAiSpeaking(false);
 
       // Start timer after AI finishes the first accusation
       if (!firstTurnCompleteRef.current) {
         firstTurnCompleteRef.current = true;
+        console.log("[GameScreen] First turn complete - starting timer");
         onTimerStart();
       }
 
@@ -1004,12 +1118,40 @@ function GameScreen({
       setCurrentTranscript("");
     };
 
+    const handleSetupComplete = () => {
+      console.log("[GameScreen] Setup complete - AI is ready!");
+    };
+
+    const handleError = (error: Error) => {
+      console.error("[GameScreen] Client error:", error);
+      setConnectionError(error.message);
+      setIsConnecting(false);
+    };
+
+    const handleClose = (event: CloseEvent) => {
+      console.log("[GameScreen] Connection closed:", event.code, event.reason);
+      setIsConnecting(false);
+
+      // Show the actual error from Google
+      if (event.reason) {
+        setConnectionError(event.reason);
+      } else if (event.code !== 1000) {
+        setConnectionError(`Connection lost (code: ${event.code})`);
+      }
+    };
+
     client.on("content", handleContent);
     client.on("turncomplete", handleTurnComplete);
+    client.on("setupcomplete", handleSetupComplete);
+    client.on("error", handleError);
+    client.on("close", handleClose);
 
     return () => {
       client.off("content", handleContent);
       client.off("turncomplete", handleTurnComplete);
+      client.off("setupcomplete", handleSetupComplete);
+      client.off("error", handleError);
+      client.off("close", handleClose);
     };
   }, [client, onWin, onTimerStart]);
 
@@ -1038,12 +1180,12 @@ function GameScreen({
   // Auto-connect when component mounts with delay for config propagation
   useEffect(() => {
     console.log("[GameScreen] Mount effect - hasStarted:", hasStartedRef.current, "connected:", connected);
-    
+
     if (!hasStartedRef.current) {
       hasStartedRef.current = true;
       setIsConnecting(true);
       console.log("[GameScreen] Starting connection process...");
-      
+
       // Delay connection to ensure config is set
       const connectionTimer = setTimeout(async () => {
         console.log("[GameScreen] Attempting to connect after delay...");
@@ -1122,67 +1264,54 @@ function GameScreen({
       exit={{ opacity: 0, scale: 0.95 }}
       className="relative flex min-h-screen flex-col overflow-hidden"
     >
-      {/* Animated gradient background */}
-      <div className="pointer-events-none absolute inset-0">
-        {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-black to-zinc-950" />
-
-        {/* Animated breathing gradients */}
+      {/* FULLSCREEN BLOB BACKGROUND - sits behind everything */}
+      <div className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center">
         <motion.div
-          className="absolute inset-0"
-          animate={{
-            background: [
-              "radial-gradient(ellipse at 30% 20%, rgba(127, 29, 29, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(180, 83, 9, 0.08) 0%, transparent 50%)",
-              "radial-gradient(ellipse at 70% 30%, rgba(127, 29, 29, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 30% 70%, rgba(180, 83, 9, 0.08) 0%, transparent 50%)",
-              "radial-gradient(ellipse at 30% 20%, rgba(127, 29, 29, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(180, 83, 9, 0.08) 0%, transparent 50%)",
-            ],
-          }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Pulsing center glow */}
-        <motion.div
-          className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background: "radial-gradient(circle, rgba(220, 38, 38, 0.06) 0%, transparent 60%)",
-            filter: "blur(60px)",
-          }}
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.4, 0.7, 0.4],
-          }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Top spotlight */}
-        <motion.div
-          className="absolute left-1/2 -top-20 h-[400px] w-[600px] -translate-x-1/2 rounded-full"
-          style={{
-            background: "radial-gradient(ellipse, rgba(251, 146, 60, 0.08) 0%, transparent 70%)",
-            filter: "blur(40px)",
-          }}
-          animate={{
-            opacity: [0.3, 0.5, 0.3],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Subtle grid */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `
-              linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)
-            `,
-            backgroundSize: "80px 80px",
-          }}
-        />
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.3, type: "spring", damping: 15 }}
+        >
+          <FloatingBlob
+            isActive={connected}
+            volume={volume}
+            isSpeaking={isAiSpeaking}
+          />
+        </motion.div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-20 border-b border-zinc-800/50 bg-black/50 backdrop-blur-xl">
+      {/* Animated gradient background overlay */}
+      <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
+        {/* Subtle vignette for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(0,0,0,0.3)_80%)]" />
+
+        {/* Floating particles - pastel colors */}
+        {[...Array(12)].map((_, i) => (
+          <motion.div
+            key={`game-particle-${i}`}
+            className="absolute size-1.5 rounded-full"
+            style={{
+              left: `${10 + (i * 7)}%`,
+              top: `${15 + ((i * 13) % 70)}%`,
+              background: i % 3 === 0 ? "rgba(129, 230, 217, 0.5)" : i % 3 === 1 ? "rgba(167, 139, 250, 0.5)" : "rgba(244, 114, 182, 0.5)",
+              filter: "blur(1px)",
+            }}
+            animate={{
+              y: [0, -30, 0],
+              opacity: [0.2, 0.6, 0.2],
+              scale: [0.8, 1.2, 0.8],
+            }}
+            transition={{
+              duration: 4 + (i % 3),
+              repeat: Infinity,
+              delay: i * 0.3,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Header - transparent to show blob behind */}
+      <header className="relative z-20 border-b border-white/10 bg-black/30 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
           {/* Logo */}
           <motion.div
@@ -1190,8 +1319,15 @@ function GameScreen({
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
           >
-            <AlertTriangle className="size-7 text-red-500" />
-            <span className="font-mono text-2xl font-bold text-white">
+            <div className="relative">
+              <motion.div
+                className="absolute -inset-2 rounded-full bg-red-500/20 blur-md"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <AlertTriangle className="relative size-8 text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+            </div>
+            <span className="font-mono text-2xl font-bold text-white drop-shadow-lg">
               DoDo
             </span>
           </motion.div>
@@ -1206,45 +1342,43 @@ function GameScreen({
           </motion.div>
         </div>
 
-        {/* Crime Banner */}
+        {/* Crime Banner - semi-transparent */}
         <motion.div
-          className="border-t border-zinc-800/30 bg-red-950/30 px-6 py-3"
+          className="border-t border-pink-500/20 bg-gradient-to-r from-pink-950/30 via-violet-900/30 to-pink-950/30 px-6 py-4 backdrop-blur-sm"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <p className="mx-auto max-w-5xl text-center text-sm">
-            <span className="font-bold text-red-400">ACCUSED OF: </span>
-            <span className="text-red-300/80">{crime}</span>
+          <p className="mx-auto max-w-5xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest text-pink-400">Accused of: </span>
+            <span className="ml-2 text-base font-medium text-pink-100">{crime}</span>
           </p>
         </motion.div>
       </header>
 
-      {/* Main content - Blob */}
+      {/* Main content */}
       <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-6">
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.3, type: "spring", damping: 15 }}
-        >
-          <FloatingBlob
-            isActive={connected}
-            volume={volume}
-            isSpeaking={isAiSpeaking}
-          />
-        </motion.div>
-
         {/* Transcript display */}
         <AnimatePresence mode="wait">
           {currentTranscript && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute bottom-32 mx-auto max-w-2xl px-6"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="absolute bottom-36 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6"
             >
-              <div className="rounded-2xl border border-zinc-700/50 bg-zinc-900/80 px-6 py-4 backdrop-blur-lg">
-                <p className="text-center text-lg text-zinc-200">
+              <div className="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-zinc-900/95 to-zinc-800/90 px-8 py-5 shadow-2xl shadow-orange-500/10 backdrop-blur-lg">
+                <div className="mb-2 flex items-center gap-2">
+                  <motion.div
+                    className="size-2 rounded-full bg-orange-500"
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 0.5, repeat: Infinity }}
+                  />
+                  <span className="text-xs font-semibold uppercase tracking-wider text-orange-400">
+                    Detective Grimstone
+                  </span>
+                </div>
+                <p className="text-lg font-medium leading-relaxed text-white">
                   {currentTranscript}
                 </p>
               </div>
@@ -1254,60 +1388,112 @@ function GameScreen({
 
         {/* Status indicator */}
         <motion.div
-          className="absolute bottom-48 flex items-center gap-2"
+          className="absolute bottom-48 flex flex-col items-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
+          {/* Pulsing status dot */}
           <motion.div
             className={cn(
-              "size-2 rounded-full",
+              "size-4 rounded-full shadow-lg",
               connectionError
-                ? "bg-red-500"
+                ? "bg-red-500 shadow-red-500/50"
                 : connected
                   ? isAiSpeaking
-                    ? "bg-orange-500"
-                    : "bg-emerald-500"
+                    ? "bg-orange-500 shadow-orange-500/50"
+                    : "bg-emerald-500 shadow-emerald-500/50"
                   : isConnecting
-                    ? "bg-amber-500"
-                    : "bg-zinc-600"
+                    ? "bg-amber-500 shadow-amber-500/50"
+                    : "bg-zinc-500 shadow-zinc-500/30"
             )}
             animate={{
-              scale: isAiSpeaking || isConnecting ? [1, 1.3, 1] : 1,
-              opacity: isAiSpeaking || isConnecting ? [1, 0.7, 1] : 1,
+              scale: isAiSpeaking || isConnecting ? [1, 1.4, 1] : 1,
+              opacity: isAiSpeaking || isConnecting ? [1, 0.6, 1] : 1,
             }}
             transition={{
-              duration: 0.5,
+              duration: 0.8,
               repeat: isAiSpeaking || isConnecting ? Infinity : 0,
             }}
           />
-          <span className="text-sm text-zinc-500">
-            {connectionError
-              ? connectionError
-              : isConnecting
-                ? "Connecting to interrogation room..."
-                : !connected
-                  ? "Waiting for connection..."
-                  : !timerStarted
+
+          {/* Status text */}
+          <div className="flex flex-col items-center gap-3">
+            <div className={cn(
+              "rounded-xl border border-zinc-700/50 bg-zinc-900/80 px-5 py-2.5 backdrop-blur-sm",
+              connectionError ? "max-w-md" : ""
+            )}>
+              <span className={cn(
+                "text-sm font-medium block text-center",
+                connectionError
+                  ? "text-red-400"
+                  : connected
                     ? isAiSpeaking
-                      ? "Detective is stating the accusation..."
-                      : "Preparing accusation..."
-                    : isAiSpeaking
-                      ? "Detective is speaking..."
-                      : "Listening to your defense..."}
-          </span>
+                      ? "text-orange-300"
+                      : "text-emerald-300"
+                    : isConnecting
+                      ? "text-amber-300"
+                      : "text-zinc-300"
+              )}>
+                {connectionError
+                  ? connectionError
+                  : isConnecting
+                    ? "Connecting to interrogation room..."
+                    : !connected
+                      ? "Waiting for connection..."
+                      : !timerStarted
+                        ? isAiSpeaking
+                          ? "Detective is stating the accusation..."
+                          : "Preparing accusation..."
+                        : isAiSpeaking
+                          ? "Detective is speaking..."
+                          : "Listening to your defense..."}
+              </span>
+            </div>
+
+            {/* Retry button when there's an error */}
+            {connectionError && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-violet-500/30 transition-all hover:bg-violet-500"
+                onClick={() => {
+                  setConnectionError(null);
+                  setIsConnecting(true);
+                  hasStartedRef.current = false;
+                  hasSentAccusationRef.current = false;
+                  firstTurnCompleteRef.current = false;
+                  // Trigger reconnection
+                  setTimeout(async () => {
+                    try {
+                      await connect();
+                    } catch (e) {
+                      console.error("Retry failed:", e);
+                    }
+                  }, 100);
+                }}
+              >
+                🔄 Retry Connection
+              </motion.button>
+            )}
+          </div>
         </motion.div>
       </main>
 
-      {/* Controls */}
-      <footer className="relative z-20 border-t border-zinc-800/50 bg-black/50 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-center gap-6 px-6 py-6">
+      {/* Controls - transparent to show blob behind */}
+      <footer className="relative z-20 border-t border-white/10 bg-black/30 backdrop-blur-md">
+        <div className="mx-auto flex max-w-5xl items-center justify-center gap-8 px-6 py-6">
           {/* Mute button */}
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               variant={muted ? "outline" : "destructive"}
               size="lg"
-              className="h-16 w-16 rounded-2xl"
+              className={cn(
+                "h-16 w-16 rounded-2xl shadow-lg transition-all",
+                muted
+                  ? "border-2 border-zinc-600 bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  : "bg-red-600 shadow-red-500/30 hover:bg-red-500"
+              )}
               onClick={() => setMuted(!muted)}
               disabled={!connected}
             >
@@ -1321,10 +1507,10 @@ function GameScreen({
               variant="ghost"
               size="lg"
               className={cn(
-                "h-20 w-20 rounded-full border-2",
+                "h-20 w-20 rounded-full border-2 shadow-lg transition-all",
                 connected
-                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
-                  : "border-zinc-600 text-zinc-400 hover:border-zinc-500 hover:bg-zinc-800"
+                  ? "border-emerald-500 bg-emerald-500/20 text-emerald-400 shadow-emerald-500/20 hover:bg-emerald-500/30"
+                  : "border-zinc-500 bg-zinc-800/50 text-zinc-300 hover:border-zinc-400 hover:bg-zinc-700/50"
               )}
               onClick={connected ? disconnect : connect}
             >
@@ -1340,14 +1526,23 @@ function GameScreen({
           <div className="h-16 w-16" />
         </div>
 
-        <p className="pb-4 text-center text-xs text-zinc-600">
+        <p className={cn(
+          "pb-4 text-center text-sm font-medium",
+          connectionError
+            ? "text-red-400"
+            : !timerStarted
+              ? "text-amber-400/80"
+              : muted
+                ? "text-orange-400/80"
+                : "text-zinc-300"
+        )}>
           {connectionError
             ? "Connection failed. Please check your internet and try again."
             : !timerStarted
-              ? "Wait for the detective to state the accusation..."
+              ? "⏳ Wait for the detective to state the accusation..."
               : muted
-                ? "Unmute your microphone to speak"
-                : "Speak clearly to defend yourself"}
+                ? "🔇 Unmute your microphone to speak"
+                : "🎤 Speak clearly to defend yourself"}
         </p>
       </footer>
     </motion.div>
@@ -1374,8 +1569,9 @@ function GameApp() {
     setTimerStarted(false);
 
     // Configure the AI with detective persona
+    // Using gemini-2.0-flash-live-001 for live streaming
     const gameConfig = {
-      model: "models/gemini-2.0-flash-exp",
+      model: "models/gemini-2.0-flash-live-001",
       systemInstruction: {
         parts: [{ text: DETECTIVE_SYSTEM_PROMPT }],
       },
@@ -1489,7 +1685,7 @@ function GameApp() {
 
 export default function GamePage() {
   // Use provided API key directly
-  const apiKey = "AIzaSyCkyRpB2Mu2izVAf1K29QFCg3sU0FOZ48g";
+  const apiKey = "AIzaSyBFu1n2QOhqQuXpY9bFWrzaOsNyg7bDAXE";
 
   const host = "generativelanguage.googleapis.com";
   const uri = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent`;
