@@ -1,8 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -41,75 +39,78 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Custom noir colors for Tailwind */
+  --color-noir-gold: var(--noir-gold);
+  --color-noir-amber: var(--noir-amber);
+  --color-noir-red: var(--noir-red);
+  --color-noir-smoke: var(--noir-smoke);
+  --color-noir-spotlight: var(--noir-spotlight);
 }
 
+/* Film Noir Interrogation Theme - Always Dark */
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Base - Deep noir blacks with subtle blue undertone */
+  --background: oklch(0.08 0.005 250);
+  --foreground: oklch(0.92 0.01 60);
+
+  /* Cards - Layered shadows for depth */
+  --card: oklch(0.12 0.008 250);
+  --card-foreground: oklch(0.90 0.01 60);
+
+  /* Popover - Slightly elevated surfaces */
+  --popover: oklch(0.14 0.01 250);
+  --popover-foreground: oklch(0.90 0.01 60);
+
+  /* Primary - Amber/Gold spotlight color */
+  --primary: oklch(0.75 0.15 70);
+  --primary-foreground: oklch(0.10 0.005 250);
+
+  /* Secondary - Cool steel gray */
+  --secondary: oklch(0.25 0.01 250);
+  --secondary-foreground: oklch(0.85 0.01 60);
+
+  /* Muted - Smoky grays */
+  --muted: oklch(0.18 0.01 250);
+  --muted-foreground: oklch(0.55 0.02 60);
+
+  /* Accent - Subtle amber tint */
+  --accent: oklch(0.20 0.03 70);
+  --accent-foreground: oklch(0.90 0.03 60);
+
+  /* Destructive - Blood red */
+  --destructive: oklch(0.50 0.22 25);
+
+  /* Borders - Subtle definition */
+  --border: oklch(0.25 0.01 250 / 40%);
+  --input: oklch(0.20 0.01 250 / 60%);
+  --ring: oklch(0.70 0.12 70 / 50%);
+
+  /* Custom noir accent colors */
+  --noir-gold: oklch(0.75 0.15 70);
+  --noir-amber: oklch(0.65 0.14 60);
+  --noir-red: oklch(0.45 0.20 25);
+  --noir-smoke: oklch(0.30 0.01 250 / 30%);
+  --noir-spotlight: oklch(0.95 0.05 70);
+
+  /* Chart colors - Noir palette */
+  --chart-1: oklch(0.75 0.15 70);
+  --chart-2: oklch(0.45 0.20 25);
+  --chart-3: oklch(0.55 0.02 250);
+  --chart-4: oklch(0.65 0.14 60);
+  --chart-5: oklch(0.40 0.01 250);
+
+  /* Sidebar - Darker interrogation room feel */
+  --sidebar: oklch(0.06 0.005 250);
+  --sidebar-foreground: oklch(0.85 0.01 60);
+  --sidebar-primary: oklch(0.75 0.15 70);
+  --sidebar-primary-foreground: oklch(0.10 0.005 250);
+  --sidebar-accent: oklch(0.15 0.02 70);
+  --sidebar-accent-foreground: oklch(0.90 0.03 60);
+  --sidebar-border: oklch(0.20 0.01 250 / 30%);
+  --sidebar-ring: oklch(0.70 0.12 70 / 50%);
 }
 
 @layer base {
@@ -118,5 +119,126 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Film grain texture overlay */
+  .film-grain {
+    position: relative;
+  }
+  .film-grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    border-radius: inherit;
+  }
+
+  /* Spotlight glow effect */
+  .spotlight-glow {
+    box-shadow:
+      0 0 60px oklch(0.75 0.15 70 / 0.1),
+      0 0 100px oklch(0.75 0.15 70 / 0.05);
+  }
+
+  /* Noir-styled border with inner highlight */
+  .noir-border {
+    border: 1px solid oklch(0.30 0.02 70 / 30%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Vignette effect for dramatic framing */
+  .vignette {
+    position: relative;
+  }
+  .vignette::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.4) 80%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  /* Spotlight cone from above */
+  .spotlight-cone {
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      oklch(0.95 0.05 70 / 0.08) 0%,
+      oklch(0.75 0.15 70 / 0.03) 30%,
+      transparent 60%
+    );
+  }
+
+  /* Tension pulse animation */
+  .tension-pulse {
+    animation: tensionPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes tensionPulse {
+    0%, 100% {
+      box-shadow: 0 0 20px oklch(0.45 0.20 25 / 0.2);
+    }
+    50% {
+      box-shadow: 0 0 40px oklch(0.45 0.20 25 / 0.4);
+    }
+  }
+
+  /* Subtle breathing animation for ambient elements */
+  .breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%, 100% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.02);
+    }
+  }
+
+  /* Light flicker effect */
+  .flicker {
+    animation: flicker 8s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.8; }
+    94% { opacity: 1; }
+    95% { opacity: 0.9; }
+    96% { opacity: 1; }
+    97% { opacity: 0.85; }
+    98% { opacity: 1; }
+  }
+
+  /* Gold text glow */
+  .text-glow-gold {
+    text-shadow:
+      0 0 10px oklch(0.75 0.15 70 / 0.5),
+      0 0 20px oklch(0.75 0.15 70 / 0.3);
+  }
+
+  /* Red text glow for warnings */
+  .text-glow-red {
+    text-shadow:
+      0 0 10px oklch(0.45 0.20 25 / 0.5),
+      0 0 20px oklch(0.45 0.20 25 / 0.3);
   }
 }

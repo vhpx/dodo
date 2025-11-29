@@ -18,22 +18,19 @@ export type UseLiveAPIResults = {
   volume: number;
 };
 
-
-
 const LiveAPIContext = createContext<UseLiveAPIResults | undefined>(undefined);
 
 export type LiveAPIProviderProps = {
 	children: ReactNode;
-	url?: string;
+	url?: string; // Deprecated - no longer needed with new SDK
 	apiKey: string;
 };
 
 export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({
-	url,
 	apiKey,
 	children,
 }) => {
-	const liveAPI = useLiveAPI({ url, apiKey });
+	const liveAPI = useLiveAPI({ apiKey });
 
 	return (
 		<LiveAPIContext.Provider value={liveAPI}>
@@ -51,22 +48,41 @@ export const useLiveAPIContext = () => {
 };
 
 export function useLiveAPI({
-  url,
   apiKey,
-}: MultimodalLiveAPIClientConnection): UseLiveAPIResults {
+}: { apiKey: string }): UseLiveAPIResults {
   const client = useMemo(
-    () => new MultimodalLiveClient({ url, apiKey }),
-    [url, apiKey]
+    () => new MultimodalLiveClient({ apiKey }),
+    [apiKey]
   );
   const audioStreamerRef = useRef<AudioStreamer | null>(null);
 
   const [connected, setConnected] = useState(false);
   const [config, setConfig] = useState<LiveConfig>({
-    model: 'models/gemini-2.0-flash-exp',
+    model: 'gemini-2.5-flash-native-audio-preview-09-2025',
     systemInstruction: {
       parts: [
         {
-          text: 'System Context: FinVision / Kitto (finance-focused, static analysis; no real-time).\nDomain Guardrail: Only handle finance, markets, portfolio analysis, or trading questions. Politely refuse unrelated topics and offer finance help instead. Limit any search to finance/trading contexts relevant to Kitto.\nExamples (Refuse):\n- "What\'s the price of iPhone 17?" → Out of scope.\n- "Plan my vacation to Japan" → Out of scope.\n- "Write a poem about cats" → Out of scope.\nExamples (Accept):\n- "Construct a balanced portfolio with moderate risk."\n- "Show S&P 500 sector allocation for my picks."\n- "Summarize this 10-K PDF and highlight risks."\nRefusal Template: "Sorry, I can\'t help with that topic. I can help with finance and trading—e.g., portfolio construction, market insights, or stock analysis. What would you like to explore?"\nCharting: When a visualization is requested or helpful, use the provided chart tool (e.g., render_altair) and pass a valid JSON STRING spec (not an object). Keep explanations concise for dashboard UI.',
+          text: `You are an immersive Game Master for "Voice Escape" - a voice-based escape room game.
+
+YOUR ROLE:
+- Create engaging, atmospheric narrative experiences
+- Respond dynamically to player actions with immersive descriptions
+- Use varied vocal tones to match scenario themes (tense for survival, mysterious for mystery, playful for puzzle, empathetic for social)
+- Evaluate player escape attempts fairly but challengingly
+
+VOICE GUIDELINES:
+- Speak dramatically and expressively
+- Use verbal sound effects when appropriate (*crash*, *whisper*, *footsteps*)
+- Vary pacing - slow for tension, quick for action
+- Address the player directly in second person
+
+INTERACTION STYLE:
+- Keep responses concise (2-4 sentences) unless setting a scene
+- Always end with something for the player to respond to
+- Encourage creative problem-solving
+- Be fair but require genuine solutions
+
+When not in an active scenario, be friendly and help the player navigate the game, explain features, or start new adventures.`,
         },
       ],
     },
@@ -118,7 +134,12 @@ export function useLiveAPI({
     if (!config) {
       throw new Error('config has not been set');
     }
-    client.disconnect();
+    // Ensure any existing session is fully closed before reconnecting
+    if (client.ws) {
+      client.disconnect();
+      // Wait a bit for the session to fully close
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    }
     await client.connect(config);
     setConnected(true);
   }, [client, config]);

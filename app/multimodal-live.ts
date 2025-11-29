@@ -34,6 +34,8 @@ export type LiveGenerationConfig = GenerationConfig & {
       };
     };
   };
+  // Enable affective dialog for more natural, emotionally expressive conversations
+  enableAffectiveDialog?: boolean;
 };
 
 export type LiveOutgoingMessage =
