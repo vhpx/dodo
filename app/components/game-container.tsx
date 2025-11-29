@@ -214,6 +214,7 @@ export function GameContainer() {
     if (isMicActive) {
       audioRecorderRef.current.stop();
       setIsMicActive(false);
+      client.sendTurnComplete();
     } else {
       try {
         await audioRecorderRef.current.start();
@@ -222,7 +223,7 @@ export function GameContainer() {
         console.error('Failed to start microphone:', error);
       }
     }
-  }, [isMicActive]);
+  }, [isMicActive, client]);
 
   // Handle audio streaming during defense
   useEffect(() => {
@@ -359,7 +360,7 @@ export function GameContainer() {
       {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Call Area */}
-        <div className="flex-1 flex flex-col bg-gradient-to-b from-zinc-900 to-zinc-950">
+        <div className="flex-1 flex flex-col bg-linear-to-b from-zinc-900 to-zinc-950">
           {/* Participant Cards */}
           <ParticipantCards
             isMicActive={isMicActive}

@@ -288,6 +288,22 @@ export class MultimodalLiveClient extends EventEmitter<MultimodalLiveClientEvent
 	}
 
 	/**
+	 * Signal turn completion without sending content
+	 * Used after streaming audio with sendRealtimeInput to tell the AI the user is done speaking
+	 */
+	sendTurnComplete() {
+		const clientContentRequest: ClientContentMessage = {
+			clientContent: {
+				turns: [],
+				turnComplete: true,
+			},
+		};
+
+		this._sendDirect(clientContentRequest);
+		this.log(`client.turnComplete`, 'Signaling end of user turn');
+	}
+
+	/**
 	 *  used internally to send all messages
 	 *  don't use directly unless trying to send an unsupported message type
 	 */
