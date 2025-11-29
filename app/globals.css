@@ -48,69 +48,69 @@
   --color-noir-spotlight: var(--noir-spotlight);
 }
 
-/* Film Noir Interrogation Theme - Always Dark */
+/* Modern Dark Theme - Brighter & More Vibrant */
 :root {
   --radius: 0.625rem;
 
-  /* Base - Deep noir blacks with subtle blue undertone */
-  --background: oklch(0.08 0.005 250);
-  --foreground: oklch(0.92 0.01 60);
+  /* Base - Softer dark background */
+  --background: oklch(0.14 0.008 260);
+  --foreground: oklch(0.95 0.01 60);
 
-  /* Cards - Layered shadows for depth */
-  --card: oklch(0.12 0.008 250);
-  --card-foreground: oklch(0.90 0.01 60);
+  /* Cards - Lighter elevated surfaces */
+  --card: oklch(0.20 0.012 260);
+  --card-foreground: oklch(0.95 0.01 60);
 
-  /* Popover - Slightly elevated surfaces */
-  --popover: oklch(0.14 0.01 250);
-  --popover-foreground: oklch(0.90 0.01 60);
+  /* Popover - Bright elevated surfaces */
+  --popover: oklch(0.22 0.015 260);
+  --popover-foreground: oklch(0.95 0.01 60);
 
-  /* Primary - Amber/Gold spotlight color */
-  --primary: oklch(0.75 0.15 70);
-  --primary-foreground: oklch(0.10 0.005 250);
+  /* Primary - Vibrant amber/gold */
+  --primary: oklch(0.80 0.16 75);
+  --primary-foreground: oklch(0.12 0.005 260);
 
-  /* Secondary - Cool steel gray */
-  --secondary: oklch(0.25 0.01 250);
-  --secondary-foreground: oklch(0.85 0.01 60);
+  /* Secondary - Lighter steel gray */
+  --secondary: oklch(0.32 0.015 260);
+  --secondary-foreground: oklch(0.92 0.01 60);
 
-  /* Muted - Smoky grays */
-  --muted: oklch(0.18 0.01 250);
-  --muted-foreground: oklch(0.55 0.02 60);
+  /* Muted - Brighter grays for better readability */
+  --muted: oklch(0.26 0.012 260);
+  --muted-foreground: oklch(0.70 0.02 60);
 
-  /* Accent - Subtle amber tint */
-  --accent: oklch(0.20 0.03 70);
-  --accent-foreground: oklch(0.90 0.03 60);
+  /* Accent - Warmer amber tint */
+  --accent: oklch(0.28 0.04 75);
+  --accent-foreground: oklch(0.95 0.03 60);
 
-  /* Destructive - Blood red */
-  --destructive: oklch(0.50 0.22 25);
+  /* Destructive - Vibrant red */
+  --destructive: oklch(0.55 0.24 25);
 
-  /* Borders - Subtle definition */
-  --border: oklch(0.25 0.01 250 / 40%);
-  --input: oklch(0.20 0.01 250 / 60%);
-  --ring: oklch(0.70 0.12 70 / 50%);
+  /* Borders - More visible definition */
+  --border: oklch(0.35 0.015 260 / 50%);
+  --input: oklch(0.28 0.012 260 / 70%);
+  --ring: oklch(0.75 0.14 75 / 60%);
 
-  /* Custom noir accent colors */
-  --noir-gold: oklch(0.75 0.15 70);
-  --noir-amber: oklch(0.65 0.14 60);
-  --noir-red: oklch(0.45 0.20 25);
-  --noir-smoke: oklch(0.30 0.01 250 / 30%);
-  --noir-spotlight: oklch(0.95 0.05 70);
+  /* Custom accent colors - Brighter */
+  --noir-gold: oklch(0.80 0.16 75);
+  --noir-amber: oklch(0.72 0.15 65);
+  --noir-red: oklch(0.50 0.22 25);
+  --noir-smoke: oklch(0.40 0.01 260 / 35%);
+  --noir-spotlight: oklch(0.98 0.05 75);
 
-  /* Chart colors - Noir palette */
-  --chart-1: oklch(0.75 0.15 70);
-  --chart-2: oklch(0.45 0.20 25);
-  --chart-3: oklch(0.55 0.02 250);
-  --chart-4: oklch(0.65 0.14 60);
-  --chart-5: oklch(0.40 0.01 250);
+  /* Chart colors - More vibrant */
+  --chart-1: oklch(0.80 0.16 75);
+  --chart-2: oklch(0.55 0.24 25);
+  --chart-3: oklch(0.65 0.03 260);
+  --chart-4: oklch(0.72 0.15 65);
+  --chart-5: oklch(0.50 0.02 260);
 
-  /* Sidebar - Darker interrogation room feel */
-  --sidebar: oklch(0.06 0.005 250);
-  --sidebar-foreground: oklch(0.85 0.01 60);
-  --sidebar-primary: oklch(0.75 0.15 70);
-  --sidebar-primary-foreground: oklch(0.10 0.005 250);
-  --sidebar-accent: oklch(0.15 0.02 70);
-  --sidebar-accent-foreground: oklch(0.90 0.03 60);
-  --sidebar-border: oklch(0.20 0.01 250 / 30%);
-  --sidebar-ring: oklch(0.70 0.12 70 / 50%);
+  /* Sidebar - Slightly lighter */
+  --sidebar: oklch(0.12 0.008 260);
+  --sidebar-foreground: oklch(0.90 0.01 60);
+  --sidebar-primary: oklch(0.80 0.16 75);
+  --sidebar-primary-foreground: oklch(0.12 0.005 260);
+  --sidebar-accent: oklch(0.22 0.03 75);
+  --sidebar-accent-foreground: oklch(0.95 0.03 60);
+  --sidebar-border: oklch(0.30 0.015 260 / 40%);
+  --sidebar-ring: oklch(0.75 0.14 75 / 60%);
 }
 
 @layer base {
@@ -141,16 +141,16 @@
   /* Spotlight glow effect */
   .spotlight-glow {
     box-shadow:
-      0 0 60px oklch(0.75 0.15 70 / 0.1),
-      0 0 100px oklch(0.75 0.15 70 / 0.05);
+      0 0 60px oklch(0.80 0.16 75 / 0.15),
+      0 0 100px oklch(0.80 0.16 75 / 0.08);
   }
 
-  /* Noir-styled border with inner highlight */
+  /* Styled border with inner highlight */
   .noir-border {
-    border: 1px solid oklch(0.30 0.02 70 / 30%);
+    border: 1px solid oklch(0.40 0.03 75 / 40%);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.03),
-      0 4px 20px rgba(0, 0, 0, 0.4);
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 4px 20px rgba(0, 0, 0, 0.3);
   }
 
   /* Vignette effect for dramatic framing */
@@ -176,8 +176,8 @@
   .spotlight-cone {
     background: radial-gradient(
       ellipse at 50% 0%,
-      oklch(0.95 0.05 70 / 0.08) 0%,
-      oklch(0.75 0.15 70 / 0.03) 30%,
+      oklch(0.98 0.05 75 / 0.12) 0%,
+      oklch(0.80 0.16 75 / 0.05) 30%,
       transparent 60%
     );
   }
@@ -189,10 +189,10 @@
 
   @keyframes tensionPulse {
     0%, 100% {
-      box-shadow: 0 0 20px oklch(0.45 0.20 25 / 0.2);
+      box-shadow: 0 0 20px oklch(0.55 0.24 25 / 0.25);
     }
     50% {
-      box-shadow: 0 0 40px oklch(0.45 0.20 25 / 0.4);
+      box-shadow: 0 0 40px oklch(0.55 0.24 25 / 0.5);
     }
   }
 
@@ -231,14 +231,14 @@
   /* Gold text glow */
   .text-glow-gold {
     text-shadow:
-      0 0 10px oklch(0.75 0.15 70 / 0.5),
-      0 0 20px oklch(0.75 0.15 70 / 0.3);
+      0 0 10px oklch(0.80 0.16 75 / 0.6),
+      0 0 20px oklch(0.80 0.16 75 / 0.4);
   }
 
   /* Red text glow for warnings */
   .text-glow-red {
     text-shadow:
-      0 0 10px oklch(0.45 0.20 25 / 0.5),
-      0 0 20px oklch(0.45 0.20 25 / 0.3);
+      0 0 10px oklch(0.55 0.24 25 / 0.6),
+      0 0 20px oklch(0.55 0.24 25 / 0.4);
   }
 }
